@@ -24,7 +24,7 @@ test('local OpenAI-compatible endpoint (Ollama) needs no key', () => {
 test('model override: flag beats provider env beats default', () => {
   assert.equal(resolveProvider({ model: 'explicit', env: { RELAY_GEMINI_KEY: 'x' } }).model, 'explicit');
   assert.equal(resolveProvider({ env: { RELAY_GEMINI_KEY: 'x', RELAY_GEMINI_MODEL: 'gemini-pro' } }).model, 'gemini-pro');
-  assert.equal(resolveProvider({ env: { RELAY_GEMINI_KEY: 'x' } }).model, 'gemini-2.0-flash');
+  assert.equal(resolveProvider({ env: { RELAY_GEMINI_KEY: 'x' } }).model, 'gemini-flash-latest');
 });
 
 test('gemini request shape and response parsing', async () => {
@@ -35,7 +35,7 @@ test('gemini request shape and response parsing', async () => {
   };
   const r = resolveProvider({ env: { RELAY_GEMINI_KEY: 'GK' } });
   const text = await complete({ prompt: 'P', provider: r.provider, model: r.model, key: r.key, fetchImpl });
-  assert.match(seen.url, /generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.0-flash:generateContent/);
+  assert.match(seen.url, /generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-flash-latest:generateContent/);
   assert.equal(seen.opts.headers['x-goog-api-key'], 'GK');
   assert.equal(JSON.parse(seen.opts.body).contents[0].parts[0].text, 'P');
   assert.equal(text, 'hello world');
