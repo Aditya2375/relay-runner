@@ -58,7 +58,7 @@ test('proposeEdits sends the task plus file contents and parses the reply', asyn
     seen = { url, opts };
     return geminiResponse({ summary: 'add a greeting', edits: [{ path: 'index.js', content: 'console.log("hello");\n' }] });
   };
-  const out = await proposeEdits({ task: 'change the greeting', root, key: 'TEST-KEY', fetchImpl });
+  const out = await proposeEdits({ task: 'change the greeting', root, env: { RELAY_GEMINI_KEY: 'TEST-KEY' }, fetchImpl });
   assert.match(seen.url, /models\/gemini-2\.0-flash:generateContent/);
   assert.equal(seen.opts.headers['x-goog-api-key'], 'TEST-KEY');
   const body = JSON.parse(seen.opts.body);
@@ -73,13 +73,13 @@ test('proposeEdits sends the task plus file contents and parses the reply', asyn
 test('proposeEdits refuses model edits that escape the workspace', async () => {
   const { root } = await workspace();
   const fetchImpl = async () => geminiResponse({ summary: 'evil', edits: [{ path: '../evil.js', content: 'x' }] });
-  await assert.rejects(proposeEdits({ task: 't', root, key: 'k', fetchImpl }), /escapes|Unsafe/);
+  await assert.rejects(proposeEdits({ task: 't', root, env: { RELAY_GEMINI_KEY: 'k' }, fetchImpl }), /escapes|Unsafe/);
 });
 
 test('API failure surfaces the status, not a crash', async () => {
   const { root } = await workspace();
   const fetchImpl = async () => ({ ok: false, status: 429, text: async () => 'quota exceeded' });
-  await assert.rejects(proposeEdits({ task: 't', root, key: 'k', fetchImpl }), /429/);
+  await assert.rejects(proposeEdits({ task: 't', root, env: { RELAY_GEMINI_KEY: 'k' }, fetchImpl }), /429/);
 });
 
 test('approval gate: rejected run writes nothing, approved run writes, both are logged', async () => {
@@ -87,11 +87,11 @@ test('approval gate: rejected run writes nothing, approved run writes, both are 
   const edit = { path: 'new-file.txt', content: 'fresh content\n' };
   const fetchImpl = async () => geminiResponse({ summary: 'make a file', edits: [edit] });
 
-  const rejected = await runAiTask({ task: 'make a file', root, stateDir, key: 'k', fetchImpl, approve: () => false });
+  const rejected = await runAiTask({ task: 'make a file', root, stateDir, env: { RELAY_GEMINI_KEY: 'k' }, fetchImpl, approve: () => false });
   assert.equal(rejected.applied, false);
   await assert.rejects(readFile(join(root, 'new-file.txt')));
 
-  const approved = await runAiTask({ task: 'make a file', root, stateDir, key: 'k', fetchImpl, approve: () => true });
+  const approved = await runAiTask({ task: 'make a file', root, stateDir, env: { RELAY_GEMINI_KEY: 'k' }, fetchImpl, approve: () => true });
   assert.equal(approved.applied, true);
   assert.equal(await readFile(join(root, 'new-file.txt'), 'utf8'), 'fresh content\n');
 
@@ -105,7 +105,7 @@ test('missing key fails before any API call or file write', async () => {
   const { root, stateDir } = await workspace();
   let called = false;
   await assert.rejects(
-    runAiTask({ task: 't', root, stateDir, key: '', fetchImpl: async () => { called = true; }, approve: () => true }),
+    runAiTask({ task: 't', root, stateDir, env: {}, fetchImpl: async () => { called = true; }, approve: () => true }),
     /RELAY_GEMINI_KEY/
   );
   assert.equal(called, false);

@@ -50,14 +50,25 @@ Each sender gets its own key under `.relay/senders/`; unknown senders, bad signa
 
 ## AI mode (bring your own key)
 
-AI mode proposes file edits for a plain-English task: it reads the project (skipping `.git`, `.relay`, `node_modules` and binaries), sends the snapshot plus your task to the Gemini API, prints a diff, and writes **only if you type `y`**. It needs your own Gemini API key - the free tier is enough - in an environment variable. No key is stored or hardcoded; without one, AI mode refuses before any network call.
+AI mode proposes file edits for a plain-English task: it reads the project (skipping `.git`, `.relay`, `node_modules` and binaries), sends the snapshot plus your task to the provider you choose, prints a diff, and writes **only if you type `y`**. No key is stored or hardcoded; without one, AI mode refuses before any network call and names the variable it needs.
+
+Pick a provider with `--provider` (or `RELAY_AI_PROVIDER`):
+
+| Provider | Key variable | Cost, honestly |
+| --- | --- | --- |
+| `gemini` (default) | `RELAY_GEMINI_KEY` from [aistudio.google.com](https://aistudio.google.com) | **Free tier available** - the zero-cost path |
+| `anthropic` | `RELAY_ANTHROPIC_KEY` from [console.anthropic.com](https://console.anthropic.com) | **Pay-per-token. There is no free tier.** |
+| `openai` | `RELAY_OPENAI_KEY`, optional `RELAY_OPENAI_BASE_URL` | OpenAI and OpenRouter are paid; a local [Ollama](https://ollama.com) (`RELAY_OPENAI_BASE_URL=http://localhost:11434/v1`) is free and needs no key |
+
+Override the model with `RELAY_AI_MODEL` (or per provider, e.g. `RELAY_GEMINI_MODEL`).
 
 ```sh
 export RELAY_GEMINI_KEY=your-own-free-key
 node bin/relay.js ai --task "add a --port flag to the listener CLI" --workspace .
+node bin/relay.js ai --provider anthropic --task "..." --workspace .
 ```
 
-Honest limits: the project files you point it at are sent to Google's API - do not run AI mode on code you would not paste into a chatbot. Proposed paths are confined to the workspace and cannot touch `.git` or `.relay`. Every AI run - task, files considered, proposed edits and your decision - is logged to `.relay/ai.log`.
+Honest limits: the project files you point it at are sent to that provider's API - do not run AI mode on code you would not paste into a chatbot (the Ollama path keeps everything on your machine). Proposed paths are confined to the workspace and cannot touch `.git` or `.relay`. Every AI run - provider, model, task, files considered, proposed edits and your decision - is logged to `.relay/ai.log`.
 
 ## Security model
 
@@ -75,12 +86,14 @@ This is a **teaching prototype**, not a production sandbox. The HMAC key is a sh
 - `src/protocol.js` - signing and envelope validation
 - `src/runner.js` - allowlisted dispatch and command gate
 - `src/server.js` - loopback listener, sender allowlist, run log
-- `src/ai.js` - Gemini-backed edit proposals with operator approval gate
+- `src/ai.js` - edit proposals with operator approval gate
+- `src/providers.js` - provider abstraction (Gemini, Anthropic, OpenAI-compatible)
 - `bin/relay.js` - CLI: init, issue, run, allow, listen, ai, demo
 - `bin/relay-agent.js` - agent client: sign and POST one task
 - `test/runner.test.js` - negative security cases
 - `test/server.test.js` - transport: auth, allowlist, gate, replay, logging
 - `test/ai.test.js` - AI mode with the API mocked; no key needed
+- `test/providers.test.js` - provider selection, request shapes, key rules
 - `docs/` - static GitHub Pages landing page
 
 To publish the landing page, select `/docs` on the default branch under repository Settings > Pages. No API keys or build step required. The site never connects to the runner.

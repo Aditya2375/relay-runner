@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f1eee6">
+<title>Start here: a beginner's guide | Relay Runner</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.guide{max-width:860px;margin:auto;padding:80px 6% 120px}
+.guide h1{font-size:clamp(42px,5.5vw,64px)}
+.guide h2{font-size:34px;margin:60px 0 16px}
+.guide h3{font-size:22px;margin:34px 0 10px}
+.guide p,.guide li{line-height:1.8;color:#57625c}
+.guide pre{padding:22px;background:#192b25;color:#e5e9dc;overflow:auto;font:12px/1.8 'DM Mono',monospace}
+.guide code:not(pre code){background:#e3e8d9;padding:2px 5px}
+.guide .warning{border-left:2px solid #375a4c;background:#e3e8d9;padding:20px}
+.guide .step{display:flex;gap:22px;margin-top:46px}
+.guide .step .num{flex:none;width:44px;height:44px;border:1px solid #375a4c;color:#375a4c;display:flex;align-items:center;justify-content:center;font:13px 'DM Mono',monospace}
+.guide .step .body{flex:1}
+.guide .step .body h2{margin-top:6px}
+figure.shot{margin:26px 0}
+figure.shot img{display:block;width:100%;height:auto;border:1px solid #aeb9ad}
+figure.shot figcaption{font-size:13px;line-height:1.7;color:#57625c;margin-top:8px}
+.guide .walkthrough{margin:35px 0 45px}
+.guide .walkthrough video{display:block;width:100%;height:auto;border:1px solid #aeb9ad;background:#192b25}
+.guide .walkthrough figcaption{font-size:13px;line-height:1.7;color:#57625c;margin-top:10px}
+table.pick{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px}
+table.pick th,table.pick td{border:1px solid #aeb9ad;padding:12px 14px;text-align:left;vertical-align:top;line-height:1.6}
+table.pick th{background:#e3e8d9;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+table.pick td{color:#57625c}
+table.errs{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px}
+table.errs th,table.errs td{border:1px solid #aeb9ad;padding:12px 14px;text-align:left;vertical-align:top;line-height:1.6}
+table.errs th{background:#e3e8d9;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+table.errs td{color:#57625c}
+table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-space:nowrap}
+.os{display:flex;flex-wrap:wrap;gap:0;margin:18px 0 6px}
+.os span{border:1px solid #375a4c;color:#375a4c;padding:4px 12px;font:11px 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-right:-1px}
+@media (max-width:640px){.guide .step{gap:14px}.guide .step .num{width:34px;height:34px}}
+</style>
+</head>
+<body>
+<div class="site">
+<header class="nav"><a class="brand" href="index.html"><span class="mark">R</span>relay runner</a><nav><a href="index.html">Overview</a><a href="guide.html">Get started</a></nav></header>
+<main class="guide">
+<p class="eyebrow">START HERE / BEGINNER'S GUIDE</p>
+<h1>Never opened a terminal? This page is for you.</h1>
+<p>This guide assumes nothing. It walks from an empty laptop to a working Relay Runner with AI mode, one step at a time, with a picture of every screen that matters. Set aside about 20 minutes. When a step has a picture, compare your screen to it before moving on.</p>
+<p>What you will end with: the project running on your own computer, a demo that needs no accounts, and AI mode connected to a provider you chose, with your own key. Nothing runs in the cloud on our side; there is no account to create with us.</p>
+
+<div class="step"><div class="num">01</div><div class="body">
+<h2>Install Node.js</h2>
+<p>Relay Runner is a Node.js program, so Node must be installed first. Node is free.</p>
+<p>Go to <a href="https://nodejs.org">nodejs.org</a> and download the version marked <strong>LTS</strong> (Long Term Support). Anything 20 or newer works; the LTS button always gives you a safe choice.</p>
+<figure class="shot"><img src="guide-assets/nodejs.jpg" alt="The nodejs.org homepage with the LTS download button"><figcaption>nodejs.org. The LTS button is the one you want.</figcaption></figure>
+<div class="os"><span>Windows</span></div>
+<p>Run the downloaded <code>.msi</code> file and click Next through the installer. The defaults are correct, including &ldquo;add to PATH&rdquo;. When it finishes, open <strong>PowerShell</strong> from the Start menu.</p>
+<div class="os"><span>macOS</span></div>
+<p>Run the downloaded <code>.pkg</code> file and click through it. Then open <strong>Terminal</strong> (Applications &rarr; Utilities &rarr; Terminal, or search &ldquo;Terminal&rdquo; in Spotlight). If you already use Homebrew, <code>brew install node</code> works too.</p>
+<div class="os"><span>Linux</span></div>
+<p>Use your distribution's package manager (for Ubuntu/Debian: <code>sudo apt install nodejs npm</code>), or follow the Nodesource instructions linked from nodejs.org for a newer version.</p>
+<h3>Check it worked</h3>
+<p>In the terminal or PowerShell window, type this and press Enter:</p>
+<pre><code>node -v</code></pre>
+<p>You should see something like <code>v22.14.0</code>. Any number starting with 20, 22 or higher is fine. If you see &ldquo;command not found&rdquo; or &ldquo;not recognized&rdquo;, close the terminal, open a new one, and try again; the installer only adds Node to windows opened after it ran.</p>
+</div></div>
+
+<div class="step"><div class="num">02</div><div class="body">
+<h2>Get the code</h2>
+<p>Two ways. Pick whichever is comfortable; both give you the same folder.</p>
+<h3>Option A: download the ZIP (no Git needed)</h3>
+<p>Open <a href="https://github.com/Aditya2375/relay-runner">github.com/Aditya2375/relay-runner</a>, click the green <strong>Code</strong> button, choose <strong>Download ZIP</strong>, then unzip it somewhere you can find again, like your Documents folder.</p>
+<h3>Option B: clone with Git</h3>
+<pre><code>git clone https://github.com/Aditya2375/relay-runner.git</code></pre>
+</div></div>
+
+<div class="step"><div class="num">03</div><div class="body">
+<h2>Open a terminal inside the folder</h2>
+<p>Every command from here on must run <em>inside</em> the relay-runner folder.</p>
+<p><strong>Windows:</strong> hold Shift and right-click the folder, choose &ldquo;Open in Terminal&rdquo; or &ldquo;Open PowerShell window here&rdquo;.<br>
+<strong>macOS:</strong> right-click the folder in Finder, choose &ldquo;New Terminal at Folder&rdquo;. (If it is missing: Finder &rarr; Settings &rarr; Services &rarr; enable it.) Or open Terminal, type <code>cd </code> with a trailing space, drag the folder onto the window, press Enter.<br>
+<strong>Linux:</strong> most file managers offer &ldquo;Open in Terminal&rdquo; on right-click, or use <code>cd</code> with the folder path.</p>
+<p>Check you are in the right place:</p>
+<pre><code>ls</code></pre>
+<p>You should see names like <code>bin</code>, <code>src</code>, <code>test</code> and <code>package.json</code>. On Windows PowerShell, <code>dir</code> shows the same thing.</p>
+</div></div>
+
+<div class="step"><div class="num">04</div><div class="body">
+<h2>Install and run the demo</h2>
+<pre><code>npm install
+npm run demo</code></pre>
+<p><code>npm install</code> finishes almost instantly: Relay Runner has no runtime dependencies, so there is nothing to download. It is not hanging; it really is that quick.</p>
+<p>The demo runs a private, zero-network loop on your machine: it signs four jobs and executes them, and shows the command gate refusing one job until the operator allows it. If you see it finish with a summary, everything works. No account, key or internet connection was needed for anything so far.</p>
+</div></div>
+
+<div class="step"><div class="num">05</div><div class="body">
+<h2>Pick an AI provider</h2>
+<p>AI mode sends the files you point at to an AI provider and shows you the edits it proposes, applying them only after you approve. You bring your own key; nothing is stored in the project. Pick one row of this table:</p>
+<table class="pick">
+<tr><th>Provider</th><th>Cost, honestly</th><th>Good if</th></tr>
+<tr><td><strong>Google Gemini</strong></td><td>Free tier available. Google gives AI Studio keys a free allowance with rate limits; you do not enter a card.</td><td>You want the free path. This is the default and the rest of the guide assumes it.</td></tr>
+<tr><td><strong>Anthropic Claude</strong></td><td>Pay-per-token. There is no free tier: you add credit (a few dollars is plenty to try) before any request works.</td><td>You specifically want Claude models.</td></tr>
+<tr><td><strong>OpenAI-compatible</strong></td><td>OpenAI and OpenRouter are paid (pay-per-token, no free tier). A local Ollama server is free and needs no key at all.</td><td>You already pay for OpenAI/OpenRouter, or you want everything local with Ollama.</td></tr>
+</table>
+<p>Then follow only the section for your choice.</p>
+
+<h3>5A &middot; Gemini: the free path</h3>
+<p>Open <a href="https://aistudio.google.com">aistudio.google.com</a>.</p>
+<figure class="shot"><img src="guide-assets/aistudio.jpg" alt="Google AI Studio sign-in page"><figcaption>Google AI Studio. Sign in with any Google account here.</figcaption></figure>
+<p>Sign in, then click <strong>Get API key</strong> in the left sidebar, then <strong>Create API key</strong>. Copy the key it shows. That string is your <code>RELAY_GEMINI_KEY</code>.</p>
+
+<h3>5B &middot; Anthropic Claude: pay-per-token</h3>
+<p>Open <a href="https://console.anthropic.com">console.anthropic.com</a> and create an account.</p>
+<figure class="shot"><img src="guide-assets/anthropic.jpg" alt="Anthropic Console sign-in page"><figcaption>The Anthropic Console. You will need to add billing credit before requests work.</figcaption></figure>
+<p>Before any key works you must add credit under <strong>Billing</strong> (pay-per-token; there is no free tier). Then go to <strong>API keys</strong>, create one, and copy it. That string is your <code>RELAY_ANTHROPIC_KEY</code>.</p>
+
+<h3>5C &middot; OpenRouter: one key, many models, paid</h3>
+<p>Open <a href="https://openrouter.ai">openrouter.ai</a>, sign in, add a small credit balance, then open <strong>Keys</strong>.</p>
+<figure class="shot"><img src="guide-assets/openrouter.jpg" alt="OpenRouter sign-in page"><figcaption>OpenRouter. It is pay-per-token like the providers behind it; there is no free tier.</figcaption></figure>
+<p>Create a key and copy it (<code>RELAY_OPENAI_KEY</code>), and note the model name you want, for example <code>openai/gpt-4o-mini</code> (<code>RELAY_OPENAI_MODEL</code>). You will also set <code>RELAY_OPENAI_BASE_URL</code> to <code>https://openrouter.ai/api/v1</code>.</p>
+
+<h3>5D &middot; OpenAI directly: paid</h3>
+<p>Open <a href="https://platform.openai.com">platform.openai.com</a>, sign in, set up billing (pay-per-token, no free tier), then create a key under <strong>API keys</strong> and copy it. That string is your <code>RELAY_OPENAI_KEY</code>; no other setting is needed. (This is the one section without a screenshot: OpenAI's sign-in page blocks our recording browser, so we describe it instead.)</p>
+
+<h3>5E &middot; Ollama: free and fully local</h3>
+<p>Open <a href="https://ollama.com">ollama.com</a> and install the app for your system.</p>
+<figure class="shot"><img src="guide-assets/ollama.jpg" alt="The ollama.com homepage"><figcaption>ollama.com. The download is free and everything runs on your own machine.</figcaption></figure>
+<p>Then pull a model and start the server:</p>
+<pre><code>ollama pull llama3.1
+ollama serve</code></pre>
+<p>No key is needed. You will set <code>RELAY_OPENAI_BASE_URL</code> to <code>http://localhost:11434/v1</code> and <code>RELAY_OPENAI_MODEL</code> to <code>llama3.1</code>. Local models are weaker than the hosted ones; expect simpler edits.</p>
+</div></div>
+
+<div class="step"><div class="num">06</div><div class="body">
+<h2>Set the environment variable</h2>
+<p>An environment variable is how you hand the key to the program without writing it into any file. The command depends on your system. Replace the example with your real key, keep the quotes, and put no spaces around the <code>=</code>.</p>
+<div class="os"><span>Windows PowerShell</span></div>
+<pre><code>$env:RELAY_GEMINI_KEY="paste-your-key-here"</code></pre>
+<p>This lasts until you close that PowerShell window. To save it permanently, use <code>setx RELAY_GEMINI_KEY "paste-your-key-here"</code> once, then close and reopen the terminal.</p>
+<div class="os"><span>macOS / Linux</span></div>
+<pre><code>export RELAY_GEMINI_KEY="paste-your-key-here"</code></pre>
+<p>This lasts until you close that terminal. To save it permanently, add the same line to <code>~/.zshrc</code> (macOS) or <code>~/.bashrc</code> (most Linux), then open a new terminal.</p>
+<p>Using a different provider? Swap the variable name: <code>RELAY_ANTHROPIC_KEY</code> for Claude; <code>RELAY_OPENAI_KEY</code> (plus <code>RELAY_OPENAI_BASE_URL</code> and <code>RELAY_OPENAI_MODEL</code>) for OpenRouter, OpenAI or Ollama. Using Claude or an OpenAI-compatible provider? Also tell Relay Runner which provider to use with <code>--provider anthropic</code> or <code>--provider openai</code>, or set <code>RELAY_AI_PROVIDER</code> once the same way.</p>
+<p class="warning"><strong>Keep the key private.</strong> Treat it like a password: do not paste it into chat rooms, screenshots or source files. If one leaks, delete it in the provider's console and make a new one. Relay Runner reads it from the environment and never stores it.</p>
+</div></div>
+
+<div class="step"><div class="num">07</div><div class="body">
+<h2>Your first AI task</h2>
+<p>Still in the relay-runner folder, run:</p>
+<pre><code>node bin/relay.js ai --task "add a one-line summary to the top of README.md" --workspace . --provider gemini</code></pre>
+<p>(Leave off <code>--provider gemini</code> if Gemini is your default; use <code>anthropic</code> or <code>openai</code> if that is what you set up.)</p>
+<p>What happens, in order: Relay Runner reads the project files, sends them with your instruction to the provider, prints the proposed changes as a diff, and then asks:</p>
+<pre><code>Apply these edits? [y/N]</code></pre>
+<p>Nothing is written until you type <code>y</code> and press Enter. Type anything else, or just press Enter, and it stops without touching a file. Every run, approved or not, is logged to <code>.relay/ai.log</code> with the provider and model used.</p>
+<figure class="walkthrough"><video controls preload="metadata" playsinline aria-label="Screen recording: setting up AI mode from a fresh terminal"><source src="relay-runner-ai-setup.mp4" type="video/mp4">Your browser cannot play this video. <a href="relay-runner-ai-setup.mp4">Download the MP4</a>.</video><figcaption>Follow-along recording of steps 5-7 on a desktop: getting a key, setting it, running one AI task. Sign-in pages are shown only up to the sign-in button; no account is faked. <a href="relay-runner-ai-setup.mp4">Download the MP4</a>.</figcaption></figure>
+</div></div>
+
+<div class="step"><div class="num">08</div><div class="body">
+<h2>Optional: the listener</h2>
+<p>Relay Runner can also accept signed jobs over HTTP on your own machine. This is the transport half of the project; it is not needed for AI mode.</p>
+<pre><code>node bin/relay.js allow my-agent --home ./sandbox
+node bin/relay.js listen --home ./sandbox</code></pre>
+<p>Leave that window running, open a second terminal in the same folder, and send a job:</p>
+<pre><code>node bin/relay-agent.js system.summary --sender my-agent \
+  --key-file ./sandbox/.relay/senders/my-agent.key</code></pre>
+<p>The listener binds 127.0.0.1 only, so nothing outside your computer can reach it. Every request and every rejection lands in <code>./sandbox/.relay/run.log</code>.</p>
+</div></div>
+
+<h2>When something goes wrong</h2>
+<table class="errs">
+<tr><th>You see</th><th>What it means / the fix</th></tr>
+<tr><td>'node' is not recognized / command not found</td><td>Node is installed but this terminal was opened before the install. Close it and open a new one. Still failing? Reinstall Node and keep &ldquo;add to PATH&rdquo; ticked.</td></tr>
+<tr><td>Cannot find module ...</td><td>You are not inside the relay-runner folder, or <code>npm install</code> has not been run here yet. Check with <code>ls</code>, then run <code>npm install</code>.</td></tr>
+<tr><td>AI mode needs your own Google Gemini API key: set RELAY_GEMINI_KEY</td><td>The variable is not set <em>in this window</em>. Run the export / $env command from step 6 again in the same window, then retry.</td></tr>
+<tr><td>API error 401 or 403</td><td>The key is wrong, revoked or copied with a stray space. Make a fresh key and set it again, carefully.</td></tr>
+<tr><td>API error 429</td><td>Rate limit. Gemini's free tier only allows so many requests per minute; wait a minute and retry. On a paid provider it means you hit your own limits.</td></tr>
+<tr><td>API error 400 / model not found</td><td>The model name does not exist for that provider. Set <code>RELAY_AI_MODEL</code> (or <code>RELAY_&lt;PROVIDER&gt;_MODEL</code>) to a model your account can use.</td></tr>
+<tr><td>fetch failed / ECONNREFUSED with Ollama</td><td>The Ollama server is not running. Start it with <code>ollama serve</code> in another window.</td></tr>
+<tr><td>Nothing applies, it just stops</td><td>That is the approval gate working: it only writes after you type <code>y</code>. Pressing Enter alone means &ldquo;no&rdquo;.</td></tr>
+</table>
+
+<h2>What this guide does not get you, yet</h2>
+<ul>
+<li><strong>One careful step at a time, not an agent.</strong> AI mode proposes one batch of edits and waits for you. It does not plan, edit, run the result and retry on its own; that loop is a future roadmap item.</li>
+<li><strong>Env vars are per-window.</strong> Until you save them permanently (step 6), every new terminal needs the export again.</li>
+<li><strong>The website cannot run anything.</strong> github.io pages are static copies of this guide; everything real happens in your terminal.</li>
+<li><strong>A weak model gives weak edits.</strong> Free tiers and local models are fine for learning, but review every diff before typing <code>y</code>, especially at first.</li>
+</ul>
+<p>For the security model, task list and protocol detail, continue to <a href="guide.html">Get started</a> and the <a href="https://github.com/Aditya2375/relay-runner">repository README</a>.</p>
+</main>
+<footer><span class="brand mini"><span class="mark">R</span>relay runner</span><span>Less access. Better questions.</span><a href="index.html">Overview ↑</a></footer>
+</div>
+</body>
+</html>

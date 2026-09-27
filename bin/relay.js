@@ -27,8 +27,12 @@ The signing key is in DIR/.relay/secret. Keep it private.
 The listener binds 127.0.0.1 only and logs every request to DIR/.relay/run.log.
 
   node bin/relay.js ai --task "what to change" --workspace DIR [--home DIR] [--yes]
-AI mode reads the project, asks Gemini for edits, shows a diff and applies
-only after you approve. Needs your own key in RELAY_GEMINI_KEY (free tier).`);
+AI mode reads the project, asks an LLM for edits, shows a diff and applies
+only after you approve. Providers (--provider or RELAY_AI_PROVIDER):
+  gemini    RELAY_GEMINI_KEY from aistudio.google.com (free tier)
+  anthropic RELAY_ANTHROPIC_KEY from console.anthropic.com (pay-per-token)
+  openai    RELAY_OPENAI_KEY + optional RELAY_OPENAI_BASE_URL (OpenAI,
+            OpenRouter, Groq, or local Ollama: http://localhost:11434/v1)`);
 }
 async function main() {
   if (!action || action === 'help') return help();
@@ -111,7 +115,8 @@ async function main() {
     try {
       const result = await runAiTask({
         task: taskText, root: workspace, stateDir,
-        key: process.env.RELAY_GEMINI_KEY,
+        providerName: flag('--provider', undefined),
+        env: process.env,
         approve: skipPrompt ? () => true : async ({ summary, diff }) => {
           console.log(`\nProposed changes:\n${summary}\n\n${diff}\n`);
           const answer = await rl.question('Apply these edits? [y/N] ');

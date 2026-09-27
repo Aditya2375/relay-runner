@@ -1,7 +1,9 @@
 import { appendFile, mkdir, readdir, readFile, writeFile, lstat } from 'node:fs/promises';
 import { join, resolve, sep, relative } from 'node:path';
 
-export const GEMINI_MODEL = 'gemini-2.0-flash';
+import { resolveProvider, complete } from './providers.js';
+
+export const DEFAULT_PROVIDER = 'gemini';
 export const MAX_FILES = 40;
 export const MAX_FILE_BYTES = 20000;
 export const MAX_EDITS = 20;
@@ -84,23 +86,17 @@ export function safeEditPath(root, p) {
   return target;
 }
 
-export async function proposeEdits({ task, root, key, model = GEMINI_MODEL, fetchImpl = fetch }) {
+export async function proposeEdits({ task, root, providerName, model, env, fetchImpl = fetch }) {
+  const resolved = resolveProvider({ provider: providerName, model, env });
   const files = await snapshotFiles(root);
-  const res = await fetchImpl(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: buildPrompt(task, files) }] }],
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.2 }
-    }),
-    signal: AbortSignal.timeout(60000)
+  const text = await complete({
+    prompt: buildPrompt(task, files),
+    provider: resolved.provider, model: resolved.model,
+    key: resolved.key, baseUrl: resolved.baseUrl, fetchImpl
   });
-  if (!res.ok) throw new Error(`Gemini API error ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const data = await res.json();
-  const text = (data?.candidates?.[0]?.content?.parts ?? []).map(p => p.text ?? '').join('');
   const { summary, edits } = parseEdits(text);
   for (const edit of edits) safeEditPath(root, edit.path);
-  return { summary, edits, filesConsidered: files.length };
+  return { summary, edits, filesConsidered: files.length, provider: resolved.name, model: resolved.model };
 }
 
 // Small line diff: LCS for files up to 400 lines, otherwise a size summary.
@@ -151,15 +147,16 @@ export async function applyEdits(edits, root) {
 
 // Full loop: snapshot -> API -> diff -> operator decision -> apply -> log.
 // Nothing is written unless approve() returns true.
-export async function runAiTask({ task, root, stateDir, key, model = GEMINI_MODEL, fetchImpl = fetch, approve, logFile = join(stateDir, 'ai.log') }) {
-  if (!key) throw new Error('AI mode needs your own Gemini API key: set RELAY_GEMINI_KEY (the free tier is enough)');
-  const { summary, edits, filesConsidered } = await proposeEdits({ task, root, key, model, fetchImpl });
+export async function runAiTask({ task, root, stateDir, providerName, model, env, fetchImpl = fetch, approve, logFile = join(stateDir, 'ai.log') }) {
+  const proposal = await proposeEdits({ task, root, providerName, model, env, fetchImpl });
+  const { summary, edits, filesConsidered } = proposal;
   const diff = await renderDiffs(edits, root);
   const approved = approve ? await approve({ summary, edits, diff }) : false;
   if (approved) await applyEdits(edits, root);
   await appendFile(logFile, JSON.stringify({
-    at: new Date().toISOString(), mode: 'ai', task, model, filesConsidered,
+    at: new Date().toISOString(), mode: 'ai', provider: proposal.provider, model: proposal.model,
+    task, filesConsidered,
     editsProposed: edits.map(e => e.path), decision: approved ? 'applied' : 'rejected'
   }) + '\n', { mode: 0o600 });
-  return { summary, edits, diff, applied: approved, filesConsidered };
+  return { summary, edits, diff, applied: approved, filesConsidered, provider: proposal.provider, model: proposal.model };
 }
