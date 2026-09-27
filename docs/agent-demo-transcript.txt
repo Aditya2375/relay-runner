@@ -1,0 +1,24 @@
+=== Relay Runner agent-loop demo (MOCKED provider, labeled as such) ===
+Task: "fix the discount bug so node check.js passes"   Workspace: /tmp/relay-demo-workspace
+
+step 1: read_file discount.js
+step 2: write_file discount.js
+[gate 1] operator approves WRITE discount.js: yes (auto-approved for this demo; real runs prompt y/N/a)
+step 3: run_command `node check.js`
+[gate 2] operator approves COMMAND `node check.js`: yes (auto-approved for this demo)
+        -> exit 1
+step 4: write_file discount.js
+[gate 3] operator approves WRITE discount.js: yes (auto-approved for this demo; real runs prompt y/N/a)
+step 5: run_command `node check.js`
+[gate 4] operator approves COMMAND `node check.js`: yes (auto-approved for this demo)
+        -> exit 0
+step 6: done
+step 6: done - discount.js now applies the percent correctly; node check.js passes
+
+Result: done in 6 steps. Final discount.js:
+function totalWithDiscount(items, discountPct) {
+  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  return subtotal * (1 - discountPct / 100);
+}
+module.exports = { totalWithDiscount };
+

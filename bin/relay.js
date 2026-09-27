@@ -7,6 +7,7 @@ import { makeJob } from '../src/protocol.js';
 import { execute, init } from '../src/runner.js';
 import { addSender, createRelayServer } from '../src/server.js';
 import { runAiTask } from '../src/ai.js';
+import { runAgentLoop } from '../src/loop.js';
 import { createInterface } from 'node:readline/promises';
 
 const [action, ...flags] = process.argv.slice(2);
@@ -27,6 +28,11 @@ The signing key is in DIR/.relay/secret. Keep it private.
 The listener binds 127.0.0.1 only and logs every request to DIR/.relay/run.log.
 
   node bin/relay.js ai --task "what to change" --workspace DIR [--home DIR] [--yes]
+  node bin/relay.js agent --task "multi-step goal" --workspace DIR [--max-steps 12] [--enable-commands]
+Agent mode loops: plan with the model, act step by step (read/write files,
+run commands), check results, retry on failure. Every write and every command
+asks the operator ([a] allows that kind for the rest of the run); commands
+also need --enable-commands at startup. Full log: DIR/.relay/agent.log
 AI mode reads the project, asks an LLM for edits, shows a diff and applies
 only after you approve. Providers (--provider or RELAY_AI_PROVIDER):
   gemini    RELAY_GEMINI_KEY from aistudio.google.com (free tier)
@@ -126,6 +132,45 @@ async function main() {
       console.log(result.applied ? `Applied ${result.edits.length} file edit(s).` : 'Rejected. Nothing was written.');
       console.log(`(${result.filesConsidered} project files considered; run logged to ${join(stateDir, 'ai.log')})`);
     } finally { if (rl) rl.close(); }
+    return;
+  }
+  if (action === 'agent') {
+    const taskText = flag('--task', '');
+    if (!taskText.trim()) throw new Error('agent needs --task "multi-step goal"');
+    const workspace = resolve(flag('--workspace', home));
+    const maxSteps = Number(flag('--max-steps', '12'));
+    const execEnabled = flags.includes('--enable-commands');
+    const logFile = join(stateDir, 'agent.log');
+    const { appendFileSync } = await import('node:fs');
+    const sessionAllow = new Set();
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    const approve = async (req) => {
+      if (sessionAllow.has(req.kind)) return true;
+      if (req.kind === 'write_file') {
+        console.log(`\n--- agent wants to write ${req.path} (step ${req.step}) ---`);
+        const oldLines = (req.before || '').split('\\n'), newLines = (req.after || '').split('\\n');
+        console.log(`(${oldLines.length} line(s) -> ${newLines.length} line(s); full current and proposed content shown)`);
+        console.log('--- current ---'); console.log(req.before || '(file does not exist yet)');
+        console.log('--- proposed ---'); console.log(req.after);
+      } else {
+        console.log(`\n--- agent wants to run (step ${req.step}): ${req.command} ---`);
+      }
+      const answer = await rl.question('Allow? [y/N/a=allow this kind for the session] ');
+      const a = answer.trim().toLowerCase();
+      if (a === 'a') { sessionAllow.add(req.kind); return true; }
+      return /^y(es)?$/.test(a);
+    };
+    try {
+      const result = await runAgentLoop({
+        task: taskText, workspace, maxSteps, execEnabled,
+        providerName: flag('--provider', undefined), env: process.env,
+        approve,
+        log: (e) => appendFileSync(logFile, JSON.stringify(e) + '\n')
+      });
+      console.log(`\nAgent finished: ${result.status} after ${result.steps} step(s). ${result.summary || result.reason || ''}`);
+      console.log(`(every step, model call, command and decision logged to ${logFile})`);
+      if (result.status !== 'done') process.exitCode = 1;
+    } finally { rl.close(); }
     return;
   }
   throw new Error(`Unknown action: ${action}`);

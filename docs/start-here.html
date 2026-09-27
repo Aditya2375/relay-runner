@@ -181,11 +181,14 @@ node bin/relay.js listen --home ./sandbox</code></pre>
 
 <h2>What this guide does not get you, yet</h2>
 <ul>
-<li><strong>One careful step at a time, not an agent.</strong> AI mode proposes one batch of edits and waits for you. It does not plan, edit, run the result and retry on its own; that loop is a future roadmap item.</li>
+<li><strong>AI mode is one careful step; agent mode is the loop.</strong> <code>node bin/relay.js agent --task "..." --workspace .</code> plans, edits, runs commands and retries until done - with your approval on every write and command, and <code>--enable-commands</code> required before any command runs. It is genuinely multi-step, but it is not Claude Code: whole-file writes only, no memory between runs, no native tool-calling, and weak models can burn the step cap without finishing.</li>
 <li><strong>Env vars are per-window.</strong> Until you save them permanently (step 6), every new terminal needs the export again.</li>
 <li><strong>The website cannot run anything.</strong> github.io pages are static copies of this guide; everything real happens in your terminal.</li>
 <li><strong>A weak model gives weak edits.</strong> Free tiers and local models are fine for learning, but review every diff before typing <code>y</code>, especially at first.</li>
 </ul>
+<h2>One step further: agent mode</h2>
+<p>When a single edit is not enough, agent mode loops: plan with the model, act, check the result, retry. Every write and every command still waits for your approval.</p>
+<pre><code>node bin/relay.js agent --task "fix the failing test in this project" --workspace . --enable-commands</code></pre>
 <p>For the security model, task list and protocol detail, continue to <a href="guide.html">Get started</a> and the <a href="https://github.com/Aditya2375/relay-runner">repository README</a>.</p>
 </main>
 <footer><span class="brand mini"><span class="mark">R</span>relay runner</span><span>Less access. Better questions.</span><a href="index.html">Overview ↑</a></footer>

@@ -70,6 +70,33 @@ node bin/relay.js ai --provider anthropic --task "..." --workspace .
 
 Honest limits: the project files you point it at are sent to that provider's API - do not run AI mode on code you would not paste into a chatbot (the Ollama path keeps everything on your machine). Proposed paths are confined to the workspace and cannot touch `.git` or `.relay`. Every AI run - provider, model, task, files considered, proposed edits and your decision - is logged to `.relay/ai.log`.
 
+
+## Agent mode (multi-step loop)
+
+Agent mode runs a full plan-act-check loop with the provider you select: the model picks the next step as strict JSON (`read_file`, `write_file`, `run_command`, `done`), the runner executes it, feeds the result (file contents, exit codes, test output) back, and the model continues until it declares the task done or the step cap stops it.
+
+```sh
+node bin/relay.js agent --task "fix the failing test in this project" --workspace . --enable-commands
+```
+
+The gates, always:
+
+- **Every file write** shows the current and proposed content and waits for your `y`. Answer `a` to allow writes for the rest of that run.
+- **Every shell command** needs the same approval, *and* command execution must be enabled at startup with `--enable-commands` - the same opt-in posture as the transport's command mode. Without it, a model that asks for a command halts the run instead of running anything.
+- **Paths are confined to the workspace.** A model reply that tries to write outside it is refused.
+- **Step cap** (default 12, `--max-steps`) stops runaway loops.
+- **Everything is logged.** Every step, model request and response, approval decision, command and exit code lands in `.relay/agent.log` as JSON lines.
+
+The loop is model-agnostic: it uses the same provider layer as AI mode (`--provider gemini|anthropic|openai`, same env vars), driving whichever provider through one strict JSON action protocol, so Gemini's JSON mode, Claude and any OpenAI-compatible endpoint (OpenRouter, Ollama) all work. A mocked-provider demo of the loop fixing a seeded bug end to end - inspect, mis-fix, run, read the failure, fix, re-run, done - is in [docs/agent-demo-transcript.txt](docs/agent-demo-transcript.txt) (`node scripts/demo-agent.js`).
+
+What the loop **cannot** do yet, honestly:
+
+- It uses a structured JSON action protocol over plain completions, not each provider's native tool/function-calling API; the provider seam (`complete()` in `src/providers.js`) is where native adapters would plug in.
+- One file at a time per step, whole-file writes only - no partial patches, so large files are expensive and small models struggle with them.
+- No memory between runs and no parallel steps; each run starts from the task and the workspace listing.
+- Approval is a person at a keyboard. `--yes`-style unattended runs exist for AI mode's single diff, but agent mode always asks - that is deliberate.
+- Free-tier and local models frequently produce invalid JSON or give up early. The loop feeds parse errors back and retries, but a weak model can burn the step cap without finishing.
+
 ## Security model
 
 A naive "agent sends commands to a bot on your laptop" is a command-and-control channel: whoever controls that agent or endpoint can run programs, read files and keep access. A prompt alone cannot make it safe. Relay Runner exposes no **remote** endpoint: the optional listener binds loopback only, authenticates each sender with its own HMAC key, and accepts no arbitrary shell commands. The demo remains fully self-contained and network-free.
