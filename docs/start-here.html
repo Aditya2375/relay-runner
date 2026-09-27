@@ -25,6 +25,13 @@ figure.shot figcaption{font-size:13px;line-height:1.7;color:#57625c;margin-top:8
 .guide .walkthrough{margin:35px 0 45px}
 .guide .walkthrough video{display:block;width:100%;height:auto;border:1px solid #aeb9ad;background:#192b25}
 .guide .walkthrough figcaption{font-size:13px;line-height:1.7;color:#57625c;margin-top:10px}
+.ospick-tabs{display:flex;gap:0;margin:26px 0 0;border:1px solid #aeb9ad;border-bottom:none}
+.ospick-tabs button{flex:1;appearance:none;background:#e3e8d9;border:none;border-right:1px solid #aeb9ad;padding:11px 10px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#192b25;cursor:pointer}
+.ospick-tabs button:last-child{border-right:none}
+.ospick-tabs button[aria-selected="true"]{background:#192b25;color:#f4f1e8}
+.ospick-tabs button:focus-visible{outline:2px solid #192b25;outline-offset:-2px}
+.ospick .walkthrough{margin-top:0}
+.ospick .walkthrough[hidden]{display:none}
 table.pick{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px}
 table.pick th,table.pick td{border:1px solid #aeb9ad;padding:12px 14px;text-align:left;vertical-align:top;line-height:1.6}
 table.pick th{background:#e3e8d9;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
@@ -49,14 +56,9 @@ table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-s
 <p>What you will end with: the project running on your own computer, a demo that needs no accounts, and AI mode connected to a provider you chose, with your own key. Nothing runs in the cloud on our side; there is no account to create with us.</p>
 
 <h2>Prefer to watch? Pick your system</h2>
-<p>Three short recordings, one per operating system, about 40 seconds each. Each one shows the whole journey end to end: the site, getting the code, the no-account demo, a free Gemini key from AI Studio, and agent mode doing a real task. Watch yours first, then use the steps below at your own pace.</p>
-<h3>Windows</h3>
-<figure class="walkthrough"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on Windows"><source src="relay-runner-howto-windows.mp4" type="video/mp4">Your browser cannot play this video. <a href="relay-runner-howto-windows.mp4">Download the MP4</a>.</video><figcaption>PowerShell, start to finish: clone, demo, free key, agent mode. <a href="relay-runner-howto-windows.mp4">Download the MP4</a>.</figcaption></figure>
-<h3>macOS</h3>
-<figure class="walkthrough"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on macOS"><source src="relay-runner-howto-macos.mp4" type="video/mp4">Your browser cannot play this video. <a href="relay-runner-howto-macos.mp4">Download the MP4</a>.</video><figcaption>Terminal (zsh), start to finish: clone, demo, free key, agent mode. <a href="relay-runner-howto-macos.mp4">Download the MP4</a>.</figcaption></figure>
-<h3>Linux</h3>
-<figure class="walkthrough"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on Linux"><source src="relay-runner-howto-linux.mp4" type="video/mp4">Your browser cannot play this video. <a href="relay-runner-howto-linux.mp4">Download the MP4</a>.</video><figcaption>Terminal (bash), start to finish: clone, demo, free key, agent mode. <a href="relay-runner-howto-linux.mp4">Download the MP4</a>.</figcaption></figure>
-<p class="warning" style="border-left-width:2px">How these were made: every command shown is the real command for that system, and every line of output is the tool's real output, recorded with a real free Gemini key. The key is hidden on screen and was revoked after recording. The terminal footage was captured on Linux and re-rendered with the exact commands and prompts for each operating system, so what you see is what you will type.</p>
+<p>Three real screen recordings, one per operating system, about a minute and a half each. Pick your system above; each one shows the whole journey end to end: the site, getting the code, the no-account demo, a free Gemini key from AI Studio, and agent mode doing a real task. Watch yours first, then use the steps below at your own pace.</p>
+<div class="ospick" id="ospick"><div class="ospick-tabs" role="tablist" aria-label="Choose your operating system"><button type="button" role="tab" id="tab-windows" aria-controls="panel-windows" aria-selected="true" data-os="windows">Windows</button><button type="button" role="tab" id="tab-macos" aria-controls="panel-macos" aria-selected="false" data-os="macos" tabindex="-1">macOS</button><button type="button" role="tab" id="tab-linux" aria-controls="panel-linux" aria-selected="false" data-os="linux" tabindex="-1">Linux</button></div><figure class="walkthrough osvideo" id="panel-windows" role="tabpanel" aria-labelledby="tab-windows"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on Windows"><source src="relay-runner-howto-windows.mp4" type="video/mp4">Your browser cannot play this video. <a href="relay-runner-howto-windows.mp4">Download the MP4</a>.</video><figcaption>PowerShell, start to finish: clone, demo, free key, agent mode. <a href="relay-runner-howto-windows.mp4">Download the MP4</a>.</figcaption></figure><figure class="walkthrough osvideo" id="panel-macos" role="tabpanel" aria-labelledby="tab-macos" hidden><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on macOS"><source src="relay-runner-howto-macos.mp4" type="video/mp4">Your browser cannot play this video. <a href="relay-runner-howto-macos.mp4">Download the MP4</a>.</video><figcaption>Terminal (zsh), start to finish: clone, demo, free key, agent mode. <a href="relay-runner-howto-macos.mp4">Download the MP4</a>.</figcaption></figure><figure class="walkthrough osvideo" id="panel-linux" role="tabpanel" aria-labelledby="tab-linux" hidden><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on Linux"><source src="relay-runner-howto-linux.mp4" type="video/mp4">Your browser cannot play this video. <a href="relay-runner-howto-linux.mp4">Download the MP4</a>.</video><figcaption>Terminal (bash), start to finish: clone, demo, free key, agent mode. <a href="relay-runner-howto-linux.mp4">Download the MP4</a>.</figcaption></figure></div>
+<p class="warning" style="border-left-width:2px">How these were made: these are real, smooth screen recordings of the whole journey, captured live as it ran. Each one was recorded on one Linux machine running the real shell for that system (PowerShell, zsh, and bash are all real programs), with the prompt dressed to match the system being shown. Every command is the exact command you will type on that system, and every line of output is the tool's real output, including a real agent run on a real free Gemini key. The key is read from a local file so it never appears on screen, and it was revoked after recording. The AI Studio page is shown signed out on purpose; no account is faked.</p>
 
 <div class="step"><div class="num">01</div><div class="body">
 <h2>Install Node.js</h2>
@@ -203,5 +205,32 @@ node bin/relay.js listen --home ./sandbox</code></pre>
 </main>
 <footer><span class="brand mini"><span class="mark">R</span>relay runner</span><span>Less access. Better questions.</span><a href="index.html">Overview ↑</a></footer>
 </div>
+<script>
+(function(){
+  var pick=document.getElementById('ospick');if(!pick)return;
+  var tabs=pick.querySelectorAll('[role="tab"]');
+  var panels=pick.querySelectorAll('.osvideo');
+  function detect(){
+    var p=(navigator.platform||'')+' '+(navigator.userAgent||'');
+    if(/Win/i.test(p))return 'windows';
+    if(/Mac|iPhone|iPad/i.test(p))return 'macos';
+    return 'linux';
+  }
+  function show(os,focus){
+    tabs.forEach(function(t){var on=t.dataset.os===os;t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;if(on&&focus)t.focus();});
+    panels.forEach(function(f){var on=f.dataset.os===os;f.hidden=!on;if(!on){var v=f.querySelector('video');if(v)v.pause();}});
+  }
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){show(t.dataset.os,false);});
+    t.addEventListener('keydown',function(e){
+      if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+      var arr=Array.prototype.slice.call(tabs),i=arr.indexOf(t);
+      var n=e.key==='ArrowRight'?(i+1)%arr.length:(i+arr.length-1)%arr.length;
+      show(arr[n].dataset.os,true);e.preventDefault();
+    });
+  });
+  show(detect(),false);
+})();
+</script>
 </body>
 </html>
