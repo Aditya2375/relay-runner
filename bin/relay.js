@@ -10,6 +10,19 @@ import { runAiTask } from '../src/ai.js';
 import { runAgentLoop } from '../src/loop.js';
 import { createInterface } from 'node:readline/promises';
 
+const BRIDGE_PROMPT = `You are talking to a person who runs Relay Runner on their own machine. It can do small, fixed jobs locally, but only after they approve each one themselves. You cannot reach their machine and you will never see their key.
+
+When they ask you to do something on their machine, reply with EXACTLY one JSON object and nothing else:
+{"task": "workspace.list", "args": {}}
+
+The only four tasks:
+- {"task": "system.summary", "args": {}} - OS and Node version of their machine
+- {"task": "workspace.list", "args": {}} - top-level names in the workspace folder they chose
+- {"task": "notes.append", "args": {"text": "..."}} - append one line (max 500 chars) to their local notes file
+- {"task": "command.node-version", "args": {}} - run one fixed command: print the Node version (they must have enabled command mode)
+
+Rules: no other tasks exist, do not invent any. File contents beyond a name listing are not available. They will paste your JSON into Relay Runner, approve or deny it themselves, and can paste the result back to you. If what they want needs more than these four tasks, say so plainly instead of guessing.`;
+
 const [action, ...flags] = process.argv.slice(2);
 function flag(name, fallback) { const i = flags.indexOf(name); return i < 0 ? fallback : flags[i + 1]; }
 function help() {
@@ -22,6 +35,10 @@ function help() {
   node bin/relay.js allow NAME --home DIR        register an agent sender
   node bin/relay.js listen --home DIR [--port 7373] [--workspace DIR] [--enable-commands]
   node bin/relay-agent.js TASK --sender NAME --key-file FILE [--url URL]
+  node bin/relay.js bridge --home DIR [--workspace DIR] [--enable-commands]
+                           paste a chat AI's job request, approve it, run it
+  node bin/relay.js bridge --prompt    print the connector prompt for any chat AI
+
 
 Tasks: system.summary, workspace.list, notes.append, command.node-version
 The signing key is in DIR/.relay/secret. Keep it private.
@@ -86,6 +103,81 @@ async function main() {
     }), null, 2));
     return;
   }
+  if (action === 'bridge') {
+    if (flags.includes('--prompt')) { console.log(BRIDGE_PROMPT); return; }
+    // Read the AI's request: from --file, or paste on stdin and end with Ctrl-D.
+    let raw;
+    const jobFile = flag('--file', null);
+    if (jobFile) {
+      raw = await readFile(jobFile, 'utf8');
+    } else {
+      console.log('Paste the job request your chat AI gave you, then press Ctrl-D:');
+      raw = await new Promise((res, rej) => {
+        let buf = '';
+        process.stdin.setEncoding('utf8');
+        process.stdin.on('data', c => { buf += c; if (buf.length > 8192) { rej(new Error('Job too large')); process.stdin.destroy(); } });
+        process.stdin.on('end', () => res(buf));
+        process.stdin.on('error', rej);
+      });
+    }
+    if (raw.length > 8192) throw new Error('Job too large');
+    // Tolerate the AI wrapping the JSON in prose or a code fence: take the first {...} block.
+    const start = raw.indexOf('{');
+    const end = raw.lastIndexOf('}');
+    if (start < 0 || end <= start) throw new Error('No JSON object found in what you pasted');
+    let request;
+    try { request = JSON.parse(raw.slice(start, end + 1)); } catch { throw new Error('That JSON does not parse - ask the AI for exactly one JSON object'); }
+    if (!request || typeof request !== 'object' || Array.isArray(request)) throw new Error('Job request must be one JSON object');
+    const { task, args = {} } = request;
+    const { TASKS } = await import('../src/protocol.js');
+    if (!TASKS.includes(task)) throw new Error(`Unknown task "${task}". The connector prompt lists the only four tasks.`);
+    if (!args || typeof args !== 'object' || Array.isArray(args)) throw new Error('args must be an object');
+    if (task === 'notes.append') {
+      if (typeof args.text !== 'string' || !args.text.trim() || args.text.length > 500 || /[\x00-\x08\x0b-\x1f]/.test(args.text))
+        throw new Error('notes.append needs args.text: 1-500 printable characters');
+      const extra = Object.keys(args).filter(k => k !== 'text');
+      if (extra.length) throw new Error(`notes.append takes only args.text, not: ${extra.join(', ')}`);
+    } else if (Object.keys(args).length) {
+      throw new Error(`${task} takes no arguments`);
+    }
+    // Show the operator EXACTLY what the AI asked for. The AI never sees the key;
+    // the signature below attests the operator's approval, not the AI's identity.
+    console.log('\nA chat AI asked for this job:');
+    console.log(`  task: ${task}`);
+    console.log(`  args: ${JSON.stringify(args)}`);
+    console.log('  workspace: ' + resolve(flag('--workspace', home)));
+    if (task === 'command.node-version' && !flags.includes('--enable-commands'))
+      console.log('  NOTE: this is a command task. It runs only if you started bridge with --enable-commands.');
+    // When the request came via stdin paste, that stream just hit EOF - ask on the tty instead.
+    let answer;
+    if (jobFile) {
+      const rl = createInterface({ input: process.stdin, output: process.stdout });
+      answer = await rl.question('\nSign and run it on this machine? [y/N] ');
+      rl.close();
+    } else {
+      answer = await new Promise((resolveAnswer) => {
+        import('node:fs').then(({ createReadStream }) => {
+          const tty = createReadStream('/dev/tty');
+          const fail = () => { console.log('(no terminal to approve on - defaulting to no)'); resolveAnswer('n'); };
+          tty.on('error', fail);
+          const rl = createInterface({ input: tty, output: process.stdout });
+          rl.on('error', fail);
+          rl.question('\nSign and run it on this machine? [y/N] ', (a) => { rl.close(); tty.destroy(); resolveAnswer(a); });
+        }).catch(() => resolveAnswer('n'));
+      });
+    }
+    if (answer.trim().toLowerCase() !== 'y') { console.log('Not approved. Nothing was signed or run.'); return; }
+    const key = await readFile(join(stateDir, 'secret'));
+    const job = makeJob(task, args, key);
+    const result = await execute(job, {
+      stateDir, workspace: resolve(flag('--workspace', home)),
+      enableCommands: flags.includes('--enable-commands')
+    });
+    console.log('\n' + JSON.stringify(result, null, 2));
+    console.log('Paste this result back to the chat AI if you want it to continue.');
+    return;
+  }
+
   if (action === 'allow') {
     const name = flags[0];
     if (!name || name.startsWith('--')) throw new Error('allow needs a sender name');
