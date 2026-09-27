@@ -7,7 +7,7 @@ export const PROVIDERS = Object.freeze({
   gemini: {
     label: 'Google Gemini',
     keyEnv: 'RELAY_GEMINI_KEY',
-    defaultModel: 'gemini-2.0-flash',
+    defaultModel: 'gemini-flash-latest',
     keyHint: 'aistudio.google.com - free tier available',
     buildRequest({ model, key, prompt }) {
       return {
