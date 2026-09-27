@@ -97,6 +97,21 @@ What the loop **cannot** do yet, honestly:
 - Approval is a person at a keyboard. `--yes`-style unattended runs exist for AI mode's single diff, but agent mode always asks - that is deliberate.
 - Free-tier and local models frequently produce invalid JSON or give up early. The loop feeds parse errors back and retries, but a weak model can burn the step cap without finishing.
 
+## Use it from any chat AI (bridge)
+
+Web chat AIs - ChatGPT, Claude, Gemini in a browser - cannot reach your machine, and they never see your key. The bridge is the honest transport between them and the runner:
+
+```sh
+node bin/relay.js bridge --prompt   # prints the connector prompt; paste it into the chat
+# the AI replies with one JSON job request
+node bin/relay.js bridge            # paste the reply, press Ctrl-D
+# Relay Runner shows exactly what the AI asked for. You type y, or nothing happens.
+```
+
+Your approval **is** the verification: the job is signed locally only after you type `y`, so the signature attests your decision at your keyboard, never the AI's identity. The bridge exposes the same four registered tasks as the listener (`system.summary`, `workspace.list`, `notes.append`, and `command.node-version` when started with `--enable-commands`) - nothing free-form. For open-ended work use agent mode in the terminal with your own provider key. The same prompt lives in [docs/connector-prompt.txt](docs/connector-prompt.txt).
+
+Honest limits: a web AI cannot trigger anything by itself - every job is carried by you and approved by you. Results can be pasted back into the chat so the AI can react to them. Desktop agent clients that support MCP are the cleaner long-term interface; the bridge is the one that works with every chat AI today.
+
 ## Security model
 
 A naive "agent sends commands to a bot on your laptop" is a command-and-control channel: whoever controls that agent or endpoint can run programs, read files and keep access. A prompt alone cannot make it safe. Relay Runner exposes no **remote** endpoint: the optional listener binds loopback only, authenticates each sender with its own HMAC key, and accepts no arbitrary shell commands. The demo remains fully self-contained and network-free.
