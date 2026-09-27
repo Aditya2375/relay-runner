@@ -19,8 +19,9 @@ function runVersion() {
   });
 }
 
-export async function execute(job, { stateDir, workspace, enableCommands = false, now = Date.now() }) {
-  const key = await readFile(join(stateDir, 'secret'));
+export async function execute(job, { stateDir, workspace, enableCommands = false, now = Date.now(), key: suppliedKey }) {
+  // The listener passes the sender key it already authenticated with; the CLI uses the operator secret.
+  const key = suppliedKey || await readFile(join(stateDir, 'secret'));
   if (!verify(job, key, now)) throw new Error('Signature, task, or timestamp rejected');
   const nonceDir = join(stateDir, 'seen');
   await mkdir(nonceDir, { recursive: true, mode: 0o700 });

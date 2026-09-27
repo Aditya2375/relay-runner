@@ -4,8 +4,19 @@
   "private": true,
   "description": "A signed, local task runner with an explicit command gate",
   "type": "module",
-  "bin": { "relay-runner": "./bin/relay.js" },
-  "scripts": { "demo": "node bin/relay.js demo", "test": "node --test", "start": "node bin/relay.js help" },
-  "engines": { "node": ">=20" },
+  "bin": {
+    "relay-runner": "./bin/relay.js",
+    "relay-agent": "./bin/relay-agent.js"
+  },
+  "scripts": {
+    "demo": "node bin/relay.js demo",
+    "test": "node --test",
+    "start": "node bin/relay.js help",
+    "listen": "node bin/relay.js listen",
+    "ai": "node bin/relay.js ai"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "license": "MIT"
 }
