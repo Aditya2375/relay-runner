@@ -59,7 +59,7 @@ test('proposeEdits sends the task plus file contents and parses the reply', asyn
     return geminiResponse({ summary: 'add a greeting', edits: [{ path: 'index.js', content: 'console.log("hello");\n' }] });
   };
   const out = await proposeEdits({ task: 'change the greeting', root, env: { RELAY_GEMINI_KEY: 'TEST-KEY' }, fetchImpl });
-  assert.match(seen.url, /models\/gemini-2\.0-flash:generateContent/);
+  assert.match(seen.url, /models\/gemini-flash-latest:generateContent/);
   assert.equal(seen.opts.headers['x-goog-api-key'], 'TEST-KEY');
   const body = JSON.parse(seen.opts.body);
   const prompt = body.contents[0].parts[0].text;
