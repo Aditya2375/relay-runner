@@ -155,15 +155,25 @@ async function main() {
       answer = await rl.question('\nSign and run it on this machine? [y/N] ');
       rl.close();
     } else {
-      answer = await new Promise((resolveAnswer) => {
-        import('node:fs').then(({ createReadStream }) => {
-          const tty = createReadStream('/dev/tty');
-          const fail = () => { console.log('(no terminal to approve on - defaulting to no)'); resolveAnswer('n'); };
-          tty.on('error', fail);
-          const rl = createInterface({ input: tty, output: process.stdout });
-          rl.on('error', fail);
-          rl.question('\nSign and run it on this machine? [y/N] ', (a) => { rl.close(); tty.destroy(); resolveAnswer(a); });
-        }).catch(() => resolveAnswer('n'));
+      // stdin already hit EOF from the paste, so ask on the terminal directly.
+      // Byte-wise readSync: no readline, no raw-mode juggling - the terminal's
+      // own line editing and echo handle the interaction.
+      answer = await import('node:fs').then(({ openSync, readSync, closeSync }) => {
+        let fd;
+        try { fd = openSync('/dev/tty', 'r'); } catch { console.log('(no terminal to approve on - defaulting to no)'); return 'n'; }
+        process.stdout.write('\nSign and run it on this machine? [y/N] ');
+        let out = '';
+        const ch = Buffer.alloc(1);
+        try {
+          while (true) {
+            if (readSync(fd, ch, 0, 1, null) === 0) break;
+            const c = ch.toString('utf8');
+            if (c === '\n' || c === '\r') break;
+            out += c;
+          }
+        } catch { /* fall through to default no */ }
+        try { closeSync(fd); } catch {}
+        return out;
       });
     }
     if (answer.trim().toLowerCase() !== 'y') { console.log('Not approved. Nothing was signed or run.'); return; }
