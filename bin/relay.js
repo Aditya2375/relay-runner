@@ -81,6 +81,10 @@ async function main() {
   const home = resolve(flag('--home', process.cwd()));
   if (action === 'init') { console.log(`Initialized ${await init(home)} (existing key preserved)`); return; }
   const stateDir = join(home, '.relay');
+  // AI, agent and bridge flows write logs and read the signing key under
+  // .relay. Create the state on first use (init never overwrites an
+  // existing key) so these work on a fresh clone without a separate init.
+  if (action === 'ai' || action === 'agent' || action === 'bridge') await init(home);
   if (action === 'issue') {
     const task = flags[0];
     const args = task === 'notes.append' ? { text: flag('--text', '') } : {};
@@ -250,7 +254,7 @@ async function main() {
       if (sessionAllow.has(req.kind)) return true;
       if (req.kind === 'write_file') {
         console.log(`\n--- agent wants to write ${req.path} (step ${req.step}) ---`);
-        const oldLines = (req.before || '').split('\\n'), newLines = (req.after || '').split('\\n');
+        const oldLines = (req.before || '').split('\n'), newLines = (req.after || '').split('\n');
         console.log(`(${oldLines.length} line(s) -> ${newLines.length} line(s); full current and proposed content shown)`);
         console.log('--- current ---'); console.log(req.before || '(file does not exist yet)');
         console.log('--- proposed ---'); console.log(req.after);

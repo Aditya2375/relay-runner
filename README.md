@@ -104,7 +104,7 @@ Web chat AIs - ChatGPT, Claude, Gemini in a browser - cannot reach your machine,
 ```sh
 node bin/relay.js bridge --prompt   # prints the connector prompt; paste it into the chat
 # the AI replies with one JSON job request
-node bin/relay.js bridge            # paste the reply, press Ctrl-D
+node bin/relay.js bridge            # paste the reply, then Ctrl-D (Ctrl+Z, Enter on Windows)
 # Relay Runner shows exactly what the AI asked for. You type y, or nothing happens.
 ```
 

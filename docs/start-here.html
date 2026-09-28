@@ -70,7 +70,7 @@ table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-s
 <div class="os"><span>macOS</span></div>
 <p>Run the downloaded <code>.pkg</code> file and click through it. Then open <strong>Terminal</strong> (Applications &rarr; Utilities &rarr; Terminal, or search &ldquo;Terminal&rdquo; in Spotlight). If you already use Homebrew, <code>brew install node</code> works too.</p>
 <div class="os"><span>Linux</span></div>
-<p>Use your distribution's package manager (for Ubuntu/Debian: <code>sudo apt install nodejs npm</code>), or follow the Nodesource instructions linked from nodejs.org for a newer version.</p>
+<p>Use your distribution's package manager, or follow the Nodesource instructions linked from nodejs.org. One warning: on Ubuntu and Debian, <code>sudo apt install nodejs npm</code> usually installs a version older than 20 (Ubuntu 24.04 gives Node 18), which is too old for Relay Runner. Check with <code>node -v</code> after installing; if the number is below 20, use Nodesource or nvm (<code>nvm install --lts</code>) instead.</p>
 <h3>Check it worked</h3>
 <p>In the terminal or PowerShell window, type this and press Enter:</p>
 <pre><code>node -v</code></pre>
@@ -156,7 +156,7 @@ ollama serve</code></pre>
 <p class="warning"><strong>Keep the key private.</strong> Treat it like a password: do not paste it into chat rooms, screenshots or source files. If one leaks, delete it in the provider's console and make a new one. Relay Runner reads it from the environment and never stores it.</p>
 </div></div>
 
-<p class="warning" style="border-left-width:2px"><strong>Prefer to drive it from ChatGPT, Claude or Gemini?</strong> Run <code>node bin/relay.js bridge --prompt</code> and paste the printed prompt into your chat. The AI replies with one small JSON job; paste it into <code>node bin/relay.js bridge</code> and press Ctrl-D. You read what it asked for, and only your <code>y</code> signs and runs it - the AI never sees your key, and only the four fixed tasks work this way. Steps 5-7 below (agent mode) are for open-ended work with your own key.</p>
+<p class="warning" style="border-left-width:2px"><strong>Prefer to drive it from ChatGPT, Claude or Gemini?</strong> Run <code>node bin/relay.js bridge --prompt</code> and paste the printed prompt into your chat. The AI replies with one small JSON job; paste it into <code>node bin/relay.js bridge</code> and press Ctrl-D (on Windows PowerShell, press Ctrl+Z then Enter instead). You read what it asked for, and only your <code>y</code> signs and runs it - the AI never sees your key, and only the four fixed tasks work this way. Steps 5-7 below (agent mode) are for open-ended work with your own key.</p>
 <div class="step"><div class="num">07</div><div class="body">
 <h2>Your first AI task</h2>
 <p>Still in the relay-runner folder, run:</p>
