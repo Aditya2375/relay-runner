@@ -3,46 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f1eee6">
+<meta name="theme-color" content="#0a0b0e">
 <title>Start here: a beginner's guide | Relay Runner</title>
 <link rel="stylesheet" href="style.css">
 <style>
-.guide{max-width:860px;margin:auto;padding:80px 6% 120px}
-.guide h1{font-size:clamp(42px,5.5vw,64px)}
-.guide h2{font-size:34px;margin:60px 0 16px}
-.guide h3{font-size:22px;margin:34px 0 10px}
-.guide p,.guide li{line-height:1.8;color:#57625c}
-.guide pre{padding:22px;background:#192b25;color:#e5e9dc;overflow:auto;font:12px/1.8 'DM Mono',monospace}
-.guide code:not(pre code){background:#e3e8d9;padding:2px 5px}
-.guide .warning{border-left:2px solid #375a4c;background:#e3e8d9;padding:20px}
-.guide .step{display:flex;gap:22px;margin-top:46px}
-.guide .step .num{flex:none;width:44px;height:44px;border:1px solid #375a4c;color:#375a4c;display:flex;align-items:center;justify-content:center;font:13px 'DM Mono',monospace}
-.guide .step .body{flex:1}
-.guide .step .body h2{margin-top:6px}
 figure.shot{margin:26px 0}
-figure.shot img{display:block;width:100%;height:auto;border:1px solid #aeb9ad}
-figure.shot figcaption{font-size:13px;line-height:1.7;color:#57625c;margin-top:8px}
-.guide .walkthrough{margin:35px 0 45px}
-.guide .walkthrough video{display:block;width:100%;height:auto;border:1px solid #aeb9ad;background:#192b25}
-.guide .walkthrough figcaption{font-size:13px;line-height:1.7;color:#57625c;margin-top:10px}
-.ospick-tabs{display:flex;gap:0;margin:26px 0 0;border:1px solid #aeb9ad;border-bottom:none}
-.ospick-tabs button{flex:1;appearance:none;background:#e3e8d9;border:none;border-right:1px solid #aeb9ad;padding:11px 10px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#192b25;cursor:pointer}
+figure.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:12px}
+figure.shot figcaption{font-size:13px;line-height:1.7;color:var(--sub);margin-top:8px}
+.guide .step .body h2{margin-top:6px}
+.ospick-tabs{display:flex;gap:0;margin:26px 0 0;border:1px solid var(--line2);border-bottom:none;border-radius:12px 12px 0 0;overflow:hidden}
+.ospick-tabs button{flex:1;appearance:none;background:var(--panel);border:none;border-right:1px solid var(--line);padding:12px 10px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);cursor:pointer}
 .ospick-tabs button:last-child{border-right:none}
-.ospick-tabs button[aria-selected="true"]{background:#192b25;color:#f4f1e8}
-.ospick-tabs button:focus-visible{outline:2px solid #192b25;outline-offset:-2px}
+.ospick-tabs button:hover{color:var(--ink)}
+.ospick-tabs button[aria-selected="true"]{background:var(--acc);color:#06251a;font-weight:500}
+.ospick-tabs button:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
 .ospick .walkthrough{margin-top:0}
+.ospick .walkthrough video{border-radius:0 0 12px 12px}
 .ospick .walkthrough[hidden]{display:none}
-table.pick{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px}
-table.pick th,table.pick td{border:1px solid #aeb9ad;padding:12px 14px;text-align:left;vertical-align:top;line-height:1.6}
-table.pick th{background:#e3e8d9;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-table.pick td{color:#57625c}
-table.errs{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px}
-table.errs th,table.errs td{border:1px solid #aeb9ad;padding:12px 14px;text-align:left;vertical-align:top;line-height:1.6}
-table.errs th{background:#e3e8d9;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-table.errs td{color:#57625c}
-table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-space:nowrap}
-.os{display:flex;flex-wrap:wrap;gap:0;margin:18px 0 6px}
-.os span{border:1px solid #375a4c;color:#375a4c;padding:4px 12px;font:11px 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-right:-1px}
+table.pick,table.errs{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px}
+table.pick th,table.pick td,table.errs th,table.errs td{border:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top;line-height:1.6}
+table.pick th,table.errs th{background:var(--panel);color:var(--ink);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+table.pick td,table.errs td{color:var(--sub)}
+table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-space:nowrap;color:#cfe8db}
+.guide .os{display:flex;flex-wrap:wrap;gap:0;margin:18px 0 6px}
+.guide .os span{border:1px solid var(--acc-line);color:var(--acc);padding:4px 12px;font:11px 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-right:-1px;border-radius:0}
+.guide .os span:first-child{border-radius:999px 0 0 999px}
+.guide .os span:last-child{border-radius:0 999px 999px 0}
 @media (max-width:640px){.guide .step{gap:14px}.guide .step .num{width:34px;height:34px}}
 </style>
 </head>
@@ -57,7 +43,31 @@ table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-s
 
 <h2>Prefer to watch? Pick your system</h2>
 <p>Three real screen recordings, one per operating system, under a minute each. Pick your system above; each one shows the whole journey end to end: the site, getting the code, the no-account demo, a free Gemini key from AI Studio, and agent mode doing a real task. Watch yours first, then use the steps below at your own pace.</p>
-<div class="ospick" id="ospick"><noscript><style>.ospick-tabs{display:none}</style></noscript><div class="ospick-tabs" role="tablist" aria-label="Choose your operating system"><button type="button" role="tab" id="tab-windows" aria-controls="panel-windows" aria-selected="true" data-os="windows">Windows</button><button type="button" role="tab" id="tab-macos" aria-controls="panel-macos" aria-selected="false" data-os="macos" tabindex="-1">macOS</button><button type="button" role="tab" id="tab-linux" aria-controls="panel-linux" aria-selected="false" data-os="linux" tabindex="-1">Linux</button></div><figure class="walkthrough osvideo" id="panel-windows" role="tabpanel" data-os="windows" aria-labelledby="tab-windows"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on Windows"><source src="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-windows.mp4" type="video/mp4">Your browser cannot play this video. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-windows.mp4">Download the MP4</a>.</video><figcaption>PowerShell, start to finish: clone, demo, free key, agent mode. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-windows.mp4">Download the MP4</a>.</figcaption></figure><figure class="walkthrough osvideo" id="panel-macos" role="tabpanel" data-os="macos" aria-labelledby="tab-macos"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on macOS"><source src="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-macos.mp4" type="video/mp4">Your browser cannot play this video. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-macos.mp4">Download the MP4</a>.</video><figcaption>Terminal (zsh), start to finish: clone, demo, free key, agent mode. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-macos.mp4">Download the MP4</a>.</figcaption></figure><figure class="walkthrough osvideo" id="panel-linux" role="tabpanel" data-os="linux" aria-labelledby="tab-linux"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on Linux"><source src="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-linux.mp4" type="video/mp4">Your browser cannot play this video. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-linux.mp4">Download the MP4</a>.</video><figcaption>Terminal (bash), start to finish: clone, demo, free key, agent mode. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-linux.mp4">Download the MP4</a>.</figcaption></figure></div>
+<div class="ospick" id="ospick"><noscript><style>
+figure.shot{margin:26px 0}
+figure.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:12px}
+figure.shot figcaption{font-size:13px;line-height:1.7;color:var(--sub);margin-top:8px}
+.guide .step .body h2{margin-top:6px}
+.ospick-tabs{display:flex;gap:0;margin:26px 0 0;border:1px solid var(--line2);border-bottom:none;border-radius:12px 12px 0 0;overflow:hidden}
+.ospick-tabs button{flex:1;appearance:none;background:var(--panel);border:none;border-right:1px solid var(--line);padding:12px 10px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);cursor:pointer}
+.ospick-tabs button:last-child{border-right:none}
+.ospick-tabs button:hover{color:var(--ink)}
+.ospick-tabs button[aria-selected="true"]{background:var(--acc);color:#06251a;font-weight:500}
+.ospick-tabs button:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.ospick .walkthrough{margin-top:0}
+.ospick .walkthrough video{border-radius:0 0 12px 12px}
+.ospick .walkthrough[hidden]{display:none}
+table.pick,table.errs{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px}
+table.pick th,table.pick td,table.errs th,table.errs td{border:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top;line-height:1.6}
+table.pick th,table.errs th{background:var(--panel);color:var(--ink);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+table.pick td,table.errs td{color:var(--sub)}
+table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-space:nowrap;color:#cfe8db}
+.guide .os{display:flex;flex-wrap:wrap;gap:0;margin:18px 0 6px}
+.guide .os span{border:1px solid var(--acc-line);color:var(--acc);padding:4px 12px;font:11px 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-right:-1px;border-radius:0}
+.guide .os span:first-child{border-radius:999px 0 0 999px}
+.guide .os span:last-child{border-radius:0 999px 999px 0}
+@media (max-width:640px){.guide .step{gap:14px}.guide .step .num{width:34px;height:34px}}
+</style></noscript><div class="ospick-tabs" role="tablist" aria-label="Choose your operating system"><button type="button" role="tab" id="tab-windows" aria-controls="panel-windows" aria-selected="true" data-os="windows">Windows</button><button type="button" role="tab" id="tab-macos" aria-controls="panel-macos" aria-selected="false" data-os="macos" tabindex="-1">macOS</button><button type="button" role="tab" id="tab-linux" aria-controls="panel-linux" aria-selected="false" data-os="linux" tabindex="-1">Linux</button></div><figure class="walkthrough osvideo" id="panel-windows" role="tabpanel" data-os="windows" aria-labelledby="tab-windows"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on Windows"><source src="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-windows.mp4" type="video/mp4">Your browser cannot play this video. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-windows.mp4">Download the MP4</a>.</video><figcaption>PowerShell, start to finish: clone, demo, free key, agent mode. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-windows.mp4">Download the MP4</a>.</figcaption></figure><figure class="walkthrough osvideo" id="panel-macos" role="tabpanel" data-os="macos" aria-labelledby="tab-macos"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on macOS"><source src="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-macos.mp4" type="video/mp4">Your browser cannot play this video. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-macos.mp4">Download the MP4</a>.</video><figcaption>Terminal (zsh), start to finish: clone, demo, free key, agent mode. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-macos.mp4">Download the MP4</a>.</figcaption></figure><figure class="walkthrough osvideo" id="panel-linux" role="tabpanel" data-os="linux" aria-labelledby="tab-linux"><video controls preload="metadata" playsinline aria-label="Follow-along recording: Relay Runner on Linux"><source src="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-linux.mp4" type="video/mp4">Your browser cannot play this video. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-linux.mp4">Download the MP4</a>.</video><figcaption>Terminal (bash), start to finish: clone, demo, free key, agent mode. <a href="https://github.com/Aditya2375/relay-runner/releases/download/site-media-v1/relay-runner-howto-linux.mp4">Download the MP4</a>.</figcaption></figure></div>
 <p class="warning" style="border-left-width:2px">How these were made: these are real, smooth screen recordings of the whole journey, captured live as it ran. Each one was recorded on one Linux machine running the real shell for that system (PowerShell, zsh, and bash are all real programs), with the prompt dressed to match the system being shown. Every command is the exact command you will type on that system, and every line of output is the tool's real output, including a real agent run on a real free Gemini key. The key is read from a local file so it never appears on screen, and it was revoked after recording. The AI Studio page is shown signed out on purpose; no account is faked. Waits, loads and idle moments were edited out for pacing - everything you see ran for real, in the order shown. The videos use Gemini because its free tier costs nothing; agent mode also works with Claude or any OpenAI-compatible model (OpenRouter, Groq, or a local Ollama).</p>
 
 <div class="step"><div class="num">01</div><div class="body">
