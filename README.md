@@ -9,6 +9,8 @@ npm test
 
 Requires Node.js 20+. No dependencies. `npm run demo` creates a temporary home directory, signs four jobs and runs them locally. The first command job is denied; the second succeeds only after the operator enables command mode. Nothing is sent to an external service.
 
+Live: https://aditya2375.github.io/relay-runner/
+
 ## Try the pieces separately
 
 ```sh
