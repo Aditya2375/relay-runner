@@ -178,3 +178,30 @@ footer a:hover{color:var(--acc)}
   footer{flex-wrap:wrap;gap:18px}
   footer>span:nth-child(2){display:none}
 }
+
+/* ---------- live terminal ---------- */
+.term-live .term-out{padding:20px 22px 8px;min-height:280px;max-height:420px;overflow-y:auto;font:12px/1.9 'DM Mono',monospace;color:#d7dde4;scrollbar-width:thin;scrollbar-color:#2a2e37 transparent}
+.term-out .t-cmd{color:#fff;font-weight:500}
+.term-out .t-mut{color:var(--faint)}
+.term-out .t-ok{color:#d7dde4}
+.term-out .t-err{color:var(--danger)}
+.term-out .t-chk{color:var(--sub);padding-left:14px}
+.term-out pre{margin:2px 0 10px 14px;padding:10px 14px;background:#080a0d;border:1px solid var(--line);border-radius:8px;overflow-x:auto;font:11px/1.7 'DM Mono',monospace;color:var(--sub)}
+.term-form{display:flex;align-items:center;gap:10px;padding:12px 22px 18px;border-top:1px solid transparent}
+.term-form .prompt{font-family:'DM Mono',monospace}
+.term-form input{flex:1;background:#080a0d;border:1px solid var(--line2);border-radius:8px;color:#fff;font:13px 'DM Mono',monospace;padding:11px 14px;outline:none;transition:border-color .25s}
+.term-form input:focus{border-color:var(--acc-line)}
+.term-form input::placeholder{color:var(--faint)}
+.term-form input:disabled{opacity:.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chips button{background:none;border:1px solid var(--line2);border-radius:999px;color:var(--sub);font:10px 'DM Mono',monospace;padding:7px 13px;cursor:pointer;transition:color .25s,border-color .25s}
+.chips button:hover{color:var(--acc);border-color:var(--acc-line)}
+.video-frame--real{position:relative}
+.video-frame--real video{display:block;width:100%;border-radius:12px;border:1px solid var(--line);aspect-ratio:16/10;background:#000}
+.video-frame--real .os-tag{position:absolute;top:12px;right:12px;pointer-events:none}
+@media(max-width:560px){
+  .term-live .term-out{min-height:230px;padding:16px 14px 6px;font-size:11px}
+  .term-form{padding:10px 14px 14px}
+  .term-form input{font-size:16px}
+  .chips{gap:6px}
+}
