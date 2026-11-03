@@ -205,3 +205,31 @@ footer a:hover{color:var(--acc)}
   .term-form input{font-size:16px}
   .chips{gap:6px}
 }
+
+/* start-here page */
+figure.shot{margin:26px 0}
+figure.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:12px}
+figure.shot figcaption{font-size:13px;line-height:1.7;color:var(--sub);margin-top:8px}
+.guide .step .body h2{margin-top:6px}
+.ospick-tabs{display:flex;gap:0;margin:26px 0 0;border:1px solid var(--line2);border-bottom:none;border-radius:12px 12px 0 0;overflow:hidden}
+.ospick-tabs button{flex:1;appearance:none;background:var(--panel);border:none;border-right:1px solid var(--line);padding:12px 10px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);cursor:pointer}
+.ospick-tabs button:last-child{border-right:none}
+.ospick-tabs button:hover{color:var(--ink)}
+.ospick-tabs button[aria-selected="true"]{background:var(--acc);color:#06251a;font-weight:500}
+.ospick-tabs button:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.ospick .walkthrough{margin-top:0}
+.ospick .walkthrough video{border-radius:0 0 12px 12px}
+.ospick .walkthrough[hidden]{display:none}
+table.pick,table.errs{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px}
+table.pick th,table.pick td,table.errs th,table.errs td{border:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top;line-height:1.6}
+table.pick th,table.errs th{background:var(--panel);color:var(--ink);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+table.pick td,table.errs td{color:var(--sub)}
+table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-space:nowrap;color:#cfe8db}
+.guide .os{display:flex;flex-wrap:wrap;gap:0;margin:18px 0 6px}
+.guide .os span{border:1px solid var(--acc-line);color:var(--acc);padding:4px 12px;font:11px 'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-right:-1px;border-radius:0}
+.guide .os span:first-child{border-radius:999px 0 0 999px}
+.guide .os span:last-child{border-radius:0 999px 999px 0}
+@media (max-width:640px){.guide .step{gap:14px}.guide .step .num{width:34px;height:34px}}
+.cell-hl{border-left-width:2px}
+.u-mt14{margin-top:14px}
+.u-mt18{margin-top:18px}
