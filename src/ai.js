@@ -2,6 +2,7 @@ import { appendFile, mkdir, readdir, readFile, writeFile, lstat } from 'node:fs/
 import { join, resolve, sep, relative } from 'node:path';
 
 import { resolveProvider, complete } from './providers.js';
+import { guardedPath, protectedName } from './path-guard.js';
 
 export const DEFAULT_PROVIDER = 'gemini';
 export const MAX_FILES = 40;
@@ -24,8 +25,8 @@ export async function snapshotFiles(root, { maxFiles = MAX_FILES, maxBytesPerFil
       if (files.length >= maxFiles) return;
       const full = join(dir, entry.name);
       if (entry.isDirectory()) {
-        if (!SKIP_DIRS.has(entry.name)) await walk(full);
-      } else if (entry.isFile() && !SKIP_FILES.has(entry.name)) {
+        if (!protectedName(entry.name)) await walk(full);
+      } else if (entry.isFile() && !SKIP_FILES.has(entry.name) && !protectedName(entry.name)) {
         const stat = await lstat(full);
         if (stat.isSymbolicLink() || stat.size > maxBytesPerFile) continue;
         const text = await readFile(full, 'utf8').catch(() => null);
@@ -86,6 +87,11 @@ export function safeEditPath(root, p) {
   return target;
 }
 
+function checkedPath(root, p) {
+  safeEditPath(root, p);
+  return guardedPath(root, p);
+}
+
 export async function proposeEdits({ task, root, providerName, model, env, fetchImpl = fetch }) {
   const resolved = resolveProvider({ provider: providerName, model, env });
   const files = await snapshotFiles(root);
@@ -95,7 +101,7 @@ export async function proposeEdits({ task, root, providerName, model, env, fetch
     key: resolved.key, baseUrl: resolved.baseUrl, fetchImpl
   });
   const { summary, edits } = parseEdits(text);
-  for (const edit of edits) safeEditPath(root, edit.path);
+  for (const edit of edits) checkedPath(root, edit.path);
   return { summary, edits, filesConsidered: files.length, provider: resolved.name, model: resolved.model };
 }
 
@@ -128,7 +134,7 @@ export function diffLines(oldText, newText) {
 export async function renderDiffs(edits, root) {
   const parts = [];
   for (const edit of edits) {
-    const target = safeEditPath(root, edit.path);
+    const target = checkedPath(root, edit.path);
     const current = await readFile(target, 'utf8').catch(() => null);
     parts.push(`=== ${edit.path}${current === null ? ' (new file)' : ''} ===\n${diffLines(current, edit.content).join('\n')}`);
   }
@@ -136,8 +142,9 @@ export async function renderDiffs(edits, root) {
 }
 
 export async function applyEdits(edits, root) {
+  for (const edit of edits) checkedPath(root, edit.path);
   for (const edit of edits) {
-    const target = safeEditPath(root, edit.path);
+    const target = checkedPath(root, edit.path);
     const stat = await lstat(target).catch(() => null);
     if (stat && stat.isSymbolicLink()) throw new Error(`Refusing to write through a symlink: ${edit.path}`);
     await mkdir(join(target, '..'), { recursive: true });
