@@ -233,3 +233,8 @@ table.errs td:first-child{font-family:'DM Mono',monospace;font-size:12px;white-s
 .cell-hl{border-left-width:2px}
 .u-mt14{margin-top:14px}
 .u-mt18{margin-top:18px}
+
+/* Keep long guide content inside narrow screens. */
+.guide .step .body{min-width:0}
+.guide video,.walkthrough video{max-width:100%;height:auto}
+@media(max-width:640px){table.pick,table.errs{display:block;max-width:100%;overflow-x:auto}.guide p,.guide li{overflow-wrap:anywhere}}
