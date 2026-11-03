@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aditya2375.github.io/relay-runner/sitemap.xml
