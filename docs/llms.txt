@@ -1,0 +1,13 @@
+# Relay Runner
+
+A small, local execution loop for AI workflows. A mock agent signs a task envelope; the runner checks the signature, freshness and replay ID, then dispatches a named task. No account, daemon or network listener needed for the demo.
+
+- Signed envelopes: HMAC signature, two-minute freshness window, replay IDs, operator approval before anything runs
+- The listener binds 127.0.0.1 only and runs in the foreground
+- Agent mode works with a free Gemini key, Claude, any OpenAI-compatible endpoint, or a local Ollama with no key
+- Node.js 20+, zero dependencies; npm run demo exercises the whole loop locally
+- Docs include real per-OS walkthrough recordings and a live in-browser demo terminal
+
+Site: https://aditya2375.github.io/relay-runner/
+Source: https://github.com/Aditya2375/relay-runner
+Author: Aditya Kulkarni (https://adityakulkarni-eta.vercel.app/)
