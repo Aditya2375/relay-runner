@@ -114,3 +114,31 @@ test('agent client CLI talks to a running listener end to end', async () => {
     assert.ok(body.result.node);
   } finally { await close(); }
 });
+
+test('request burst is capped without executing excess jobs', async () => {
+  const home = await mkdtemp(join(tmpdir(), 'relay-limit-'));
+  const stateDir = await init(home);
+  const key = await readFile(await addSender(stateDir, 'test-agent'));
+  const server = createRelayServer({ stateDir, workspace: home, logFile: join(stateDir, 'run.log'), maxRequestsPerMinute: 2 });
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  try {
+    const post = () => fetch(`http://127.0.0.1:${server.address().port}/jobs`, { method: 'POST', body: JSON.stringify({ sender: 'test-agent', job: makeJob('system.summary', {}, key) }) });
+    assert.equal((await post()).status, 200);
+    assert.equal((await post()).status, 200);
+    const excess = await post();
+    assert.equal(excess.status, 429);
+    assert.equal(excess.headers.get('retry-after'), '60');
+  } finally { await new Promise(r => server.close(r)); }
+});
+
+test('log storage failure returns a quiet 503 instead of crashing', async () => {
+  const home = await mkdtemp(join(tmpdir(), 'relay-log-fail-'));
+  const stateDir = await init(home);
+  const server = createRelayServer({ stateDir, workspace: home, logFile: join(home, 'absent', 'run.log') });
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  try {
+    const res = await fetch(`http://127.0.0.1:${server.address().port}/missing`);
+    assert.equal(res.status, 503);
+    assert.deepEqual(await res.json(), { ok: false, error: 'Runner unavailable' });
+  } finally { await new Promise(r => server.close(r)); }
+});
