@@ -141,3 +141,21 @@ This is a **teaching prototype**, not a production sandbox. The HMAC key is a sh
 - `docs/` - static GitHub Pages landing page
 
 To publish the landing page, select `/docs` on the default branch under repository Settings > Pages. No API keys or build step required. The site never connects to the runner.
+
+## Safety and reliability limits
+
+The listener binds to loopback, caps request bodies at 8 KiB, accepts at most
+120 requests per minute and four concurrent requests, and times out incomplete
+requests. Signed job IDs are reserved before execution, so a replay or crash
+cannot silently repeat a write. Storage failures return a quiet error.
+
+AI snapshots and model-selected file paths exclude `.git`, `.relay`, `.env`
+files and common credential-file names. Symlink paths are refused, and agent
+reads are capped at 20 KB. This is a guard, not a secret detector: review the
+workspace before sending it to any provider. Explicitly approved shell commands
+are not sandboxed and can access the operator's machine. Keep command mode off
+unless you understand the exact command. Do not expose the listener publicly.
+
+Provider calls have a 120-second timeout. They are not automatically retried,
+because a retry can incur another provider charge. The hosted demo is static;
+it does not receive your signing keys, run a backend, or execute your commands.
