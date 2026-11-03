@@ -44,15 +44,25 @@ async function readBody(req) {
 
 // One route: POST /jobs with { sender, job }. Every request and every
 // decision lands in the run log as one JSON line, accepted or not.
-export function createRelayServer({ stateDir, workspace, enableCommands = false, logFile }) {
+export function createRelayServer({ stateDir, workspace, enableCommands = false, logFile, maxRequestsPerMinute = 120, maxConcurrent = 4 }) {
+  let windowStarted = Date.now(), requestCount = 0, active = 0;
   async function log(entry) {
     await appendFile(logFile, JSON.stringify({ at: new Date().toISOString(), ...entry }) + '\n', { mode: 0o600 });
   }
-  return createServer(async (req, res) => {
+  const server = createServer({ requestTimeout: 15000, headersTimeout: 10000, keepAliveTimeout: 5000 }, async (req, res) => {
     const send = (code, obj) => {
       res.writeHead(code, { 'content-type': 'application/json' });
       res.end(JSON.stringify(obj) + '\n');
     };
+    try {
+      if (Date.now() - windowStarted >= 60000) { windowStarted = Date.now(); requestCount = 0; }
+      if (++requestCount > maxRequestsPerMinute || active >= maxConcurrent) {
+        res.setHeader('retry-after', '60');
+        req.resume();
+        return send(429, { ok: false, error: 'Request limit reached' });
+      }
+      active++;
+      try {
     if (req.method !== 'POST' || req.url !== '/jobs') {
       await log({ decision: 'rejected', reason: 'not_found', method: req.method });
       return send(404, { ok: false, error: 'Not found' });
@@ -66,9 +76,9 @@ export function createRelayServer({ stateDir, workspace, enableCommands = false,
     const sender = envelope && typeof envelope === 'object' ? envelope.sender : null;
     const job = envelope && typeof envelope === 'object' ? envelope.job : null;
     const base = {
-      sender: typeof sender === 'string' ? sender : null,
-      task: job && typeof job === 'object' ? job.task ?? null : null,
-      jobId: job && typeof job === 'object' ? job.id ?? null : null
+      sender: typeof sender === 'string' ? sender.slice(0, 32) : null,
+      task: typeof job?.task === 'string' ? job.task.slice(0, 64) : null,
+      jobId: typeof job?.id === 'string' ? job.id.slice(0, 64) : null
     };
     let key;
     try { key = await readFile(senderKeyPath(stateDir, sender)); }
@@ -88,5 +98,14 @@ export function createRelayServer({ stateDir, workspace, enableCommands = false,
       await log({ ...base, decision: 'rejected', reason: err.message });
       return send(/off/.test(err.message) ? 403 : 409, { ok: false, error: err.message });
     }
+      } finally { active--; }
+    } catch {
+      // Logging/storage failure must never escape as an unhandled rejection.
+      if (!res.headersSent) send(503, { ok: false, error: 'Runner unavailable' });
+      else res.destroy();
+    }
   });
+  server.maxConnections = 32;
+  server.maxRequestsPerSocket = 100;
+  return server;
 }
