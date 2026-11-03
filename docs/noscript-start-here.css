@@ -1,0 +1,3 @@
+/* No-JS: show every walkthrough, hide the tab bar. */
+.ospick-tabs{display:none}
+.ospick .walkthrough[hidden]{display:block}
