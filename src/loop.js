@@ -9,16 +9,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { exec } from 'node:child_process';
 import { resolveProvider, complete } from './providers.js';
+import { guardedPath, protectedName } from './path-guard.js';
 
 const ACTIONS = ['read_file', 'write_file', 'run_command', 'done'];
-
-function safeJoin(workspace, p) {
-  const abs = path.resolve(workspace, String(p || ''));
-  if (abs !== workspace && !abs.startsWith(workspace + path.sep)) {
-    throw new Error(`path escapes the workspace: ${p}`);
-  }
-  return abs;
-}
 
 function parseAction(text) {
   const cleaned = String(text).trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
@@ -78,7 +71,7 @@ export async function runAgentLoop({
 
   for (let step = 1; step <= maxSteps; step++) {
     let listing = '(unreadable)';
-    try { listing = fs.readdirSync(ws).slice(0, 50).join(', '); } catch {}
+    try { listing = fs.readdirSync(ws).filter(n => !protectedName(n)).slice(0, 50).join(', '); } catch {}
     const prompt = buildPrompt({ task, history, workspaceListing: listing });
     emit({ type: 'model_request', step, promptBytes: prompt.length });
     const raw = await completeImpl({ prompt, provider, model: resolvedModel, key, baseUrl, fetchImpl });
@@ -102,7 +95,9 @@ export async function runAgentLoop({
     if (action.action === 'read_file') {
       let note;
       try {
-        const abs = safeJoin(ws, action.path);
+        const abs = guardedPath(ws, action.path);
+        const stat = fs.statSync(abs);
+        if (!stat.isFile() || stat.size > 20000) throw new Error('read requires a text file no larger than 20000 bytes');
         const content = fs.readFileSync(abs, 'utf8');
         note = `read_file ${action.path}: ok (${content.length} chars)\n---\n${content.slice(0, 6000)}`;
         emit({ type: 'read_file', step, path: action.path, ok: true });
@@ -116,7 +111,7 @@ export async function runAgentLoop({
 
     if (action.action === 'write_file') {
       let abs;
-      try { abs = safeJoin(ws, action.path); } catch (err) {
+      try { abs = guardedPath(ws, action.path); } catch (err) {
         history.push(`step ${step}: write_file ${action.path}: refused: ${err.message}`);
         emit({ type: 'write_file', step, path: action.path, ok: false, error: err.message });
         continue;
@@ -128,8 +123,9 @@ export async function runAgentLoop({
         emit({ type: 'halt', step, reason: `operator denied write to ${action.path}` });
         return { status: 'halted', steps: step, reason: `operator denied write to ${action.path}`, provider: name, model: resolvedModel };
       }
+      abs = guardedPath(ws, action.path); // Recheck after the operator's approval pause.
       fs.mkdirSync(path.dirname(abs), { recursive: true });
-      fs.writeFileSync(abs, String(action.content ?? ''));
+      fs.writeFileSync(abs, String(action.content ?? ''), { flag: 'w' });
       emit({ type: 'write_file', step, path: action.path, ok: true, bytes: String(action.content ?? '').length });
       history.push(`step ${step}: write_file ${action.path}: applied after operator approval`);
       continue;
