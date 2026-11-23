@@ -132,19 +132,20 @@ function mockAgentPlan(input) {
    provider mocked and labeled, and the check genuinely evaluated
    against the code the agent writes. */
 async function runCheck(ws) {
-  const srcFile = ws['src/discount.js'];
-  let mod;
-  try {
-    const factory = new Function('module', 'exports', 'require', srcFile);
-    const module = { exports: {} };
-    factory(module, module.exports, () => ({}));
-    mod = module.exports;
-  } catch (err) { return { code: 1, out: 'discount.js does not parse: ' + err.message }; }
-  try {
-    const got = mod.totalWithDiscount([{ price: 10, qty: 2 }], 10);
-    if (got !== 18) return { code: 1, out: 'expected 18, got ' + got };
-    return { code: 0, out: 'check passed: 20 at 10% off = ' + got };
-  } catch (err) { return { code: 1, out: String(err) }; }
+  const source = ws['src/discount.js'];
+  if (typeof Worker === 'undefined') return { code: 1, out: 'A browser Worker is required to evaluate this fixture.' };
+  const program = `const module = {exports:{}};\n${source}\ntry { const got = module.exports.totalWithDiscount([{price:10,qty:2}],10); postMessage({code:got===18?0:1,out:got===18?'check passed: 20 at 10% off = 18':'expected 18, got '+got}); } catch(e) { postMessage({code:1,out:String(e)}); }`;
+  const url = URL.createObjectURL(new Blob([program], { type: 'text/javascript' }));
+  return new Promise(resolve => {
+    let worker, timer;
+    const finish = result => { clearTimeout(timer); worker?.terminate(); URL.revokeObjectURL(url); resolve(result); };
+    try {
+      worker = new Worker(url);
+      worker.onmessage = event => finish(event.data);
+      worker.onerror = event => { event.preventDefault(); finish({code:1,out:'Fixture check failed: '+event.message}); };
+      timer = setTimeout(() => finish({code:1,out:'Fixture check timed out.'}), 1500);
+    } catch(error) { finish({code:1,out:'Fixture check unavailable: '+error.message}); }
+  });
 }
 const properFix = `function totalWithDiscount(items, discountPct) {
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -300,8 +301,8 @@ if (typeof document !== 'undefined') (() => {
     await sleep(250);
     ok('created .relay/secret (32 random bytes, this tab only) - never overwritten, never leaves the browser');
     await sleep(200);
-    info('This terminal runs Relay Runner\'s real protocol and runner against a demo workspace in your tab.');
-    info('Natural language is mapped by the offline mock agent; the installed version plans with a real model (free Gemini key, or a local model).');
+    info('This terminal uses a browser port of Relay Runner\'s protocol and dispatch against demo files. It is not the installed CLI.');
+    info('Natural language is mapped by an offline rule-based planner. No live model or local CLI is connected.');
     info('Try a suggestion below, or type "help".');
   })();
 })();

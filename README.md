@@ -58,14 +58,14 @@ Pick a provider with `--provider` (or `RELAY_AI_PROVIDER`):
 
 | Provider | Key variable | Cost, honestly |
 | --- | --- | --- |
-| `gemini` (default) | `RELAY_GEMINI_KEY` from [aistudio.google.com](https://aistudio.google.com) | **Free tier available** - the zero-cost path |
-| `anthropic` | `RELAY_ANTHROPIC_KEY` from [console.anthropic.com](https://console.anthropic.com) | **Pay-per-token. There is no free tier.** |
-| `openai` | `RELAY_OPENAI_KEY`, optional `RELAY_OPENAI_BASE_URL` | OpenAI and OpenRouter are paid; a local [Ollama](https://ollama.com) (`RELAY_OPENAI_BASE_URL=http://localhost:11434/v1`) is free and needs no key |
+| `gemini` (default) | `RELAY_GEMINI_KEY` from [aistudio.google.com](https://aistudio.google.com) | Check current quotas, eligibility and pricing in your provider account. |
+| `anthropic` | `RELAY_ANTHROPIC_KEY` from [console.anthropic.com](https://console.anthropic.com) | Check current access and pricing before sending requests. |
+| `openai` | `RELAY_OPENAI_KEY`, optional `RELAY_OPENAI_BASE_URL` | Hosted endpoints use their own billing. A local [Ollama](https://ollama.com) endpoint (`RELAY_OPENAI_BASE_URL=http://localhost:11434/v1`) needs no API key. |
 
 Override the model with `RELAY_AI_MODEL` (or per provider, e.g. `RELAY_GEMINI_MODEL`).
 
 ```sh
-export RELAY_GEMINI_KEY=your-own-free-key
+export RELAY_GEMINI_KEY=your-own-key
 node bin/relay.js ai --task "add a --port flag to the listener CLI" --workspace .
 node bin/relay.js ai --provider anthropic --task "..." --workspace .
 ```
@@ -120,7 +120,7 @@ A naive "agent sends commands to a bot on your laptop" is a command-and-control 
 
 - **Authentication:** HMAC-SHA256 signs each task. The key stays on the machine in a private `.relay` directory. A malformed, modified, expired or incorrectly signed envelope is rejected.
 - **Small authority:** Tasks are named, arguments are validated, and there is no path supplied by the agent. `workspace.list` returns only up to 50 top-level names, not file contents. `notes.append` writes one fixed file, refuses symlinks, and caps text at 500 characters.
-- **Operator gate:** Command mode is off by default. `--enable-commands` permits *one fixed command template*, `node --version`, not a shell or arbitrary executable. Expanding this registry means reviewing code and granting more capability on purpose. Shell execution is not supported, even when command mode is enabled.
+- **Transport command gate:** Command mode is off by default. In the signed-task transport, `--enable-commands` permits only the fixed `node --version` template. This is not the coding-loop command gate: agent mode can run approved shell commands with the operator's privileges. Those commands are not sandboxed. Review each command before approving it, or before allowing that action type for the rest of a run.
 - **Replay and freshness:** Jobs expire after two minutes. A nonce file is reserved before execution, so the same job cannot be executed twice. If the process crashes after reservation, that job is lost rather than retried.
 
 This is a **teaching prototype**, not a production sandbox. The HMAC key is a shared secret: any process running as the same OS user that can read the key can impersonate the mock agent. It does not protect against a compromised user account, malicious repository code, compromised Node runtime, or a malicious operator. Directory permissions do not isolate processes sharing a user ID, and Unix permissions may behave differently on Windows. Do not pair an untrusted remote model or accept internet-submitted jobs with this sample. Before real deployment, use distinct OS identities, authenticated pairing and key rotation, a reviewed job transport, isolated workers, per-task consent for meaningful effects, resource limits, audit logs and tests for your target OS.
